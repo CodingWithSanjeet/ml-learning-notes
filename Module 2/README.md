@@ -1042,20 +1042,23 @@ Step 2: Calculate cost J(-1.0)
 When we tried many different θ₁ numbers, we found that each one gives us a different cost. This helps us build the complete cost function curve!
 
 **Our Test Results:**
-- θ₁ = -1.0 → Cost = 9.33 (extremely bad!)
-- θ₁ = -0.5 → Cost = 5.25 (very bad!)
-- θ₁ = 0 → Cost = 2.33 (bad)  
-- θ₁ = 0.5 → Cost = 0.58 (good)
-- θ₁ = 1.0 → Cost = 0 (perfect!) ✨
-- θ₁ = 1.5 → Cost = 0.58 (good)
-- θ₁ = 2.0 → Cost = 2.33 (bad)
+
+| Parameter θ₁ | Cost J(θ₁) | Performance | Quality Rating |
+|----------|------------|-------------|----------------|
+| **-1.0** | 9.333 | Extremely Bad | 🔴 Terrible |
+| **-0.5** | 5.250 | Very Bad | 🟠 Poor |
+| **0.0** | 2.333 | Bad | 🟡 Weak |
+| **0.5** | 0.583 | Good | 🔵 Decent |
+| **1.0** | **0.000** | **Perfect!** ✨ | 🟢 **Optimal** |
+| **1.5** | 0.583 | Good | 🔵 Decent |
+| **2.0** | 2.333 | Bad | 🟡 Weak |
 
 **The Simple Rule:**
 Each θ₁ number gives us:
 - One specific line (hypothesis)
 - One specific cost (how good that line is)
 
-![All Hypothesis Lines](images/all_hypothesis_lines.png)
+![All Hypothesis Lines](images/individual_hypothesis_graphs.png)
 *Visual proof: Each θ₁ value creates a completely different line! The green line (θ₁ = 1.0) perfectly fits all data points.*
 
 **Easy Examples:**
