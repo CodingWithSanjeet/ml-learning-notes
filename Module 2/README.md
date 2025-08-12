@@ -10,6 +10,12 @@ Welcome to Module 2! Now that you understand the fundamentals of Machine Learnin
   - [How the Learning Algorithm Works](#how-the-learning-algorithm-works)
   - [The Hypothesis Function](#the-hypothesis-function)
   - [Why Start with Linear Regression?](#why-start-with-linear-regression)
+- [Lecture 2: Cost Function](#lecture-2-cost-function)
+  - [Understanding Parameters](#understanding-parameters)
+  - [The Parameter Problem](#the-parameter-problem)
+  - [What is a Cost Function?](#what-is-a-cost-function)
+  - [Squared Error Cost Function](#squared-error-cost-function)
+  - [Mathematical Formulation](#mathematical-formulation)
 - [Key Takeaways](#key-takeaways)
 
 ---
@@ -243,7 +249,7 @@ graph LR
 
 **Linear Regression Visualization:**
 
-![Linear Regression Chart](../linear_regression_chart.png)
+![Linear Regression Chart](images/linear_regression_chart.png)
 
 *Professional chart showing the relationship between house size and price with the linear regression line*
 
@@ -408,6 +414,369 @@ Try thinking about other linear relationships:
 - Years of experience → Salary
 
 Each follows the same pattern: **y = θ₀ + θ₁x**
+
+---
+
+## Lecture 2: Cost Function
+
+Now that we understand what a hypothesis function is, the big question becomes: **How do we choose the best values for θ₀ and θ₁?** This is where the cost function comes in!
+
+### 🎯 The Big Picture
+
+In Lecture 1, we learned that our hypothesis is:
+**h_θ(x) = θ₀ + θ₁x**
+
+But we never answered: How do we find the best θ₀ and θ₁ values? Lecture 2 solves this fundamental problem.
+
+### Understanding Parameters
+
+#### 📊 Our Training Set (Real Example)
+
+Let's look at our housing data with m = 47 training examples:
+
+| **Size in feet² (x)** | **Price ($) in 1000's (y)** |
+|------------------------|------------------------------|
+| 2104 | 460 |
+| 1416 | 232 |
+| 1534 | 315 |
+| 852 | 178 |
+| ... | ... |
+
+*Note: m = 47 means we have 47 house examples in our training set*
+
+#### 🔧 Parameters are the "Knobs" We Can Turn
+
+Think of θ₀ and θ₁ as **adjustment knobs** on our prediction machine:
+
+- **θ₀ (theta zero)**: The **intercept** - where the line crosses the y-axis
+- **θ₁ (theta one)**: The **slope** - how steep the line is
+
+**The Question**: Which settings of these "knobs" give us the best predictions?
+
+### The Parameter Problem
+
+#### 🎛️ Different Parameter Values = Different Lines
+
+Let's see what happens when we change our parameters:
+
+```mermaid
+graph TD
+    subgraph "Parameter Effects on Hypothesis Function"
+        A["θ₀ = 1.5, θ₁ = 0<br/>→ h(x) = 1.5<br/>(Horizontal line at y=1.5)"]
+        B["θ₀ = 0, θ₁ = 0.5<br/>→ h(x) = 0.5x<br/>(Line through origin)"]
+        C["θ₀ = 1, θ₁ = 0.5<br/>→ h(x) = 1 + 0.5x<br/>(Sloped line with y-intercept at 1)"]
+    end
+    
+    style A fill:#ffebee
+    style B fill:#e8f5e8
+    style C fill:#e1f5fe
+```
+
+#### 📈 Visual Examples
+
+![Parameter Examples](images/parameter_examples_chart.png)
+
+*How different θ₀ and θ₁ values create completely different hypothesis functions*
+
+**Example 1**: θ₀ = 1.5, θ₁ = 0
+```
+h(x) = 1.5 + 0×x = 1.5
+```
+This gives us a **flat horizontal line** at y = 1.5 (no matter what house size, we always predict $1,500)
+
+**Example 2**: θ₀ = 0, θ₁ = 0.5  
+```
+h(x) = 0 + 0.5×x = 0.5x
+```
+This gives us a **line through the origin** that goes up 0.5 for every 1 unit of x
+
+**Example 3**: θ₀ = 1, θ₁ = 0.5
+```
+h(x) = 1 + 0.5×x
+```
+This gives us a **sloped line** starting at y = 1 and going up 0.5 for every 1 unit of x
+
+#### 🤔 The Core Problem
+
+**With infinite possible values for θ₀ and θ₁, how do we pick the BEST ones?**
+
+We need a way to measure "how good" our line fits the data. This is where the **cost function** comes to the rescue!
+
+### What is a Cost Function?
+
+#### 💡 The Basic Idea
+
+**Goal**: Choose θ₀ and θ₁ so that h_θ(x) is close to y for our training examples.
+
+Think of it like this:
+- You have actual house prices (y values)
+- Your hypothesis makes predictions (h_θ(x) values)  
+- A **cost function** measures how far off your predictions are
+
+#### 🎯 The Intuitive Approach
+
+```mermaid
+flowchart LR
+    A["🏠 Training Data<br/>(x⁽ⁱ⁾, y⁽ⁱ⁾)"] --> B["🔮 Hypothesis<br/>h_θ(x⁽ⁱ⁾)"]
+    B --> C["📏 Compare<br/>Prediction vs Reality"]
+    D["🎯 Actual Price<br/>y⁽ⁱ⁾"] --> C
+    C --> E["💯 Cost Function<br/>Measures 'Badness'"]
+    
+    style A fill:#e8f5e8
+    style B fill:#fff3e0
+    style C fill:#f3e5f5
+    style D fill:#e1f5fe
+    style E fill:#ffebee
+```
+
+![Cost Function Visualization](images/cost_function_visualization.png)
+
+*The cost function measures how far our predictions are from the actual values*
+
+**For each house in our training set:**
+1. **Input**: House size x⁽ⁱ⁾
+2. **Prediction**: h_θ(x⁽ⁱ⁾) = θ₀ + θ₁x⁽ⁱ⁾
+3. **Reality**: Actual price y⁽ⁱ⁾  
+4. **Error**: How far off we were = |h_θ(x⁽ⁱ⁾) - y⁽ⁱ⁾|
+
+### Squared Error Cost Function
+
+#### 🧮 The Mathematical Formula
+
+**We can measure the accuracy of our hypothesis function by using a cost function.** This takes an average difference (actually a fancier version of an average) of all the results of the hypothesis with inputs from x's and the actual output y's.
+
+The **cost function J(θ₀, θ₁)** measures the total "badness" of our parameter choices:
+
+```
+J(θ₀, θ₁) = (1/2m) × Σ(i=1 to m) [h_θ(x⁽ⁱ⁾) - y⁽ⁱ⁾]²
+```
+
+**Alternative notation you might see:**
+```
+J(θ₀, θ₁) = (1/2m) × Σ(i=1 to m) [ŷ⁽ⁱ⁾ - y⁽ⁱ⁾]²
+```
+Where ŷ⁽ⁱ⁾ = h_θ(x⁽ⁱ⁾) (predicted value)
+
+Let's break this down piece by piece:
+
+#### 🧩 Breaking Down the Formula
+
+| **Component** | **Meaning** | **Why It's There** |
+|---------------|-------------|-------------------|
+| **h_θ(x⁽ⁱ⁾)** | Our prediction for house i | This is what our model thinks |
+| **y⁽ⁱ⁾** | Actual price of house i | This is the truth |
+| **h_θ(x⁽ⁱ⁾) - y⁽ⁱ⁾** | Prediction error for house i | How wrong we were |
+| **[...]²** | Square the error | Makes all errors positive, penalizes big errors more |
+| **Σ(i=1 to m)** | Sum over all houses | Add up errors from all training examples |
+| **1/2m** | Divide by 2×(number of examples) | Get average error, 1/2 makes math easier later |
+
+#### 🤔 Why Do We Divide by 1/2m? (Beginner Explanation)
+
+This is one of the most confusing parts for beginners! Let's break it down step by step:
+
+**Step 1: Why divide by 'm'?**
+- **m** = number of training examples (houses in our dataset)
+- We want the **average** error, not the total error
+- If we don't divide by m, having more data would always make our cost bigger
+- **Example**: 10 houses with $5k average error vs 1000 houses with $5k average error
+  - Without dividing: Total errors would be 10×$5k = $50k vs 1000×$5k = $5M
+  - After dividing by m: Both give average error of $5k ✅
+
+**Step 2: Why the extra 1/2?**
+This is a **mathematical convenience** for calculus (don't worry if this seems advanced):
+
+**The Simple Answer**: It makes the math cleaner when we later find the minimum of this function.
+
+**The Technical Answer**: 
+```
+d/dx (x²) = 2x
+```
+When we take the derivative of the squared term, we get a factor of 2. The 1/2 cancels this out, making our final equations simpler.
+
+**Think of it like this**: 
+- **(1/m)** = "Give me the average error"  
+- **(1/2)** = "Make the math easier for finding the minimum"
+- **Combined (1/2m)** = "Give me half the average squared error"
+
+**Important**: The 1/2 doesn't change which θ₀ and θ₁ values are best! It just makes the numbers smaller and the math cleaner.
+
+#### 🎯 Why Square the Errors?
+
+**1. Makes All Errors Positive**
+- If we predict $250k and actual is $300k: error = -$50k
+- If we predict $350k and actual is $300k: error = +$50k  
+- Without squaring, these cancel out! Squaring fixes this.
+
+**2. Penalizes Big Errors More**
+- Small error (10k): 10² = 100
+- Big error (50k): 50² = 2,500  
+- We want to avoid really bad predictions!
+
+**3. Mathematical Convenience**
+- Squared functions are smooth and easy to minimize
+- No absolute value signs to worry about
+
+#### 🏠 Concrete Example
+
+Let's say we have 3 houses:
+
+| House | Size (x) | Actual Price (y) | Our Prediction h_θ(x) | Error | Error² |
+|-------|----------|------------------|----------------------|-------|--------|
+| 1 | 1000 | $200k | $180k | -$20k | $400k² |
+| 2 | 2000 | $400k | $380k | -$20k | $400k² |  
+| 3 | 1500 | $300k | $320k | +$20k | $400k² |
+
+```
+J(θ₀, θ₁) = (1/2×3) × (400 + 400 + 400) = (1/6) × 1200 = 200
+```
+
+### Mathematical Formulation
+
+#### 📝 The Complete Cost Function
+
+**Formal Definition**:
+```
+J(θ₀, θ₁) = (1/2m) × Σ(i=1 to m) [h_θ(x⁽ⁱ⁾) - y⁽ⁱ⁾]²
+```
+
+Where:
+- **h_θ(x⁽ⁱ⁾) = θ₀ + θ₁x⁽ⁱ⁾** (our hypothesis function)
+- **m** = number of training examples
+- **(x⁽ⁱ⁾, y⁽ⁱ⁾)** = i-th training example
+
+#### 🎯 Our Goal (Optimization Problem)
+
+```
+minimize J(θ₀, θ₁)
+θ₀, θ₁
+```
+
+**Translation**: Find the values of θ₀ and θ₁ that make the cost function as small as possible.
+
+#### 🔄 The Complete Picture
+
+```mermaid
+graph TD
+    A["📊 Training Set<br/>(houses + prices)"] --> B["🎛️ Choose θ₀, θ₁"]
+    B --> C["🔮 Create Hypothesis<br/>h_θ(x) = θ₀ + θ₁x"]
+    C --> D["📏 Calculate Predictions<br/>for all training houses"]
+    D --> E["💯 Compute Cost<br/>J(θ₀, θ₁)"]
+    E --> F{"🎯 Is cost<br/>minimized?"}
+    F -->|No| G["🔄 Adjust θ₀, θ₁"]
+    G --> C
+    F -->|Yes| H["🎉 Found best parameters!"]
+    
+    style A fill:#e8f5e8
+    style B fill:#fff3e0  
+    style C fill:#e1f5fe
+    style D fill:#f3e5f5
+    style E fill:#ffebee
+    style F fill:#fff8e1
+    style G fill:#e8f5e8
+    style H fill:#e1f5fe
+```
+
+#### 🧠 Intuitive Understanding
+
+**Think of the cost function as a "goodness meter":**
+- **Low cost** = Our line fits the data well (good parameters!)
+- **High cost** = Our line fits the data poorly (bad parameters!)
+
+**The Process:**
+1. **Try different θ₀ and θ₁ values**
+2. **For each combination, calculate J(θ₀, θ₁)**  
+3. **Find the combination that gives the lowest cost**
+4. **Those are our best parameters!**
+
+### 📚 Alternative Names
+
+The cost function has several names you might encounter:
+
+- **Cost Function** ✅ (most common)
+- **Squared Error Function** ✅ (instructor's term)
+- **Mean Squared Error (MSE)** ✅ (very common)
+- **Squared Error Cost Function**  
+- **Loss Function**
+- **Objective Function**
+
+**From the instructor**: *"This function is otherwise called the 'Squared error function', or 'Mean squared error'."*
+
+#### 🧮 Breaking Down "Mean Squared Error"
+
+Let's understand this term piece by piece:
+
+```
+J(θ₀, θ₁) = (1/2m) × Σ(i=1 to m) [h_θ(x⁽ⁱ⁾) - y⁽ⁱ⁾]²
+```
+
+**To break it apart, it is (1/2) × x̄ where x̄ is the mean of the squares of h_θ(x⁽ⁱ⁾) - y⁽ⁱ⁾**, or the difference between the predicted value and the actual value.
+
+- **Mean**: We're averaging (Σ divided by m)
+- **Squared**: We square each error ([ ]²)  
+- **Error**: We measure prediction mistakes (h_θ(x⁽ⁱ⁾) - y⁽ⁱ⁾)
+- **1/2**: Mathematical convenience for gradient descent
+
+They all refer to the same concept!
+
+### 🤔 Why This Particular Cost Function?
+
+#### ✅ **Advantages of Squared Error**
+
+1. **Widely Used**: Works well for most regression problems
+2. **Mathematical Properties**: Smooth, differentiable, easy to minimize
+3. **Interpretable**: Directly measures prediction accuracy
+4. **Proven**: Decades of successful applications
+5. **Gradient Descent Friendly**: The 1/2 term makes calculus cleaner
+
+#### 🔄 **Connection to Gradient Descent**
+
+**From the instructor**: *"The mean is halved (1/2) as a convenience for the computation of the gradient descent, as the derivative term of the square function will cancel out the 1/2 term."*
+
+**What this means for beginners:**
+- **Gradient Descent** is the algorithm we'll learn next that actually finds the minimum
+- When we take derivatives (calculus), squared terms give us a factor of 2
+- The 1/2 cancels this 2, making our equations much cleaner
+- **Result**: Simpler math when finding the best θ₀ and θ₁ values
+
+**Don't worry if this seems advanced** - the key point is that 1/2 makes the optimization algorithm work more smoothly!
+
+#### 🔄 **Other Options Exist**
+
+While squared error is most common, there are alternatives:
+- **Mean Absolute Error**: Σ|h_θ(x⁽ⁱ⁾) - y⁽ⁱ⁾|
+- **Huber Loss**: Combination of squared and absolute error
+- **Custom Functions**: For specific problem requirements
+
+*We'll explore these alternatives later in the course!*
+
+### 🎯 What's Next?
+
+Now that we understand **what** the cost function is, the next questions are:
+
+1. **How do we actually minimize J(θ₀, θ₁)?**
+2. **What does this cost function look like visually?**
+3. **How do we find the minimum efficiently?**
+
+These questions lead us to **Gradient Descent** - the algorithm that actually finds the best parameters!
+
+### 💡 Key Insights
+
+#### **🎯 The Core Problem**
+- We need to choose θ₀ and θ₁ to make good predictions
+- "Good" means close to actual house prices in our training set
+
+#### **📏 The Measurement Tool**  
+- Cost function J(θ₀, θ₁) measures how "bad" our parameters are
+- Lower cost = better fit to training data
+
+#### **🎛️ The Optimization Goal**
+- Find θ₀ and θ₁ that minimize J(θ₀, θ₁)  
+- This gives us the "best" straight line through our data
+
+#### **🧮 The Mathematical Approach**
+- Use squared errors to measure badness
+- Average over all training examples
+- Result: smooth function we can minimize
 
 ---
 
