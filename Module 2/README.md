@@ -1067,7 +1067,7 @@ Each θ₁ number gives us:
 
 #### 📊 Visual Representation
 
-![Cost Function Visualization](images/cost_function_complete_visualization.png)
+![Cost Function Visualization](images/complete_7_theta_analysis.png)
 
 *Left: Different θ₁ values create different hypothesis lines. Right: Each θ₁ produces a different cost J(θ₁). The green star shows the optimal θ₁ = 1.0 with zero cost!*
 
@@ -1140,7 +1140,7 @@ Different θ₁ behaviors:
 ![Individual Hypothesis Graphs](images/individual_hypothesis_graphs.png)
 *Individual graphs showing different θ₁ values and their prediction errors*
 
-![Cost Function Visualization](images/cost_function_complete_visualization.png)
+![Cost Function Visualization](images/complete_7_theta_analysis.png)
 *Complete visualization: hypothesis lines (left) and cost function curve (right)*
 
 ---
