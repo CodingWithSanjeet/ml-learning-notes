@@ -16,6 +16,12 @@ Welcome to Module 2! Now that you understand the fundamentals of Machine Learnin
   - [What is a Cost Function?](#what-is-a-cost-function)
   - [Squared Error Cost Function](#squared-error-cost-function)
   - [Mathematical Formulation](#mathematical-formulation)
+- [Lecture 3: Cost Function - Intuition I](#lecture-3-cost-function---intuition-i)
+  - [Simplified Hypothesis for Better Understanding](#simplified-hypothesis-for-better-understanding)
+  - [Two Key Functions to Understand](#two-key-functions-to-understand)
+  - [Step-by-Step Examples](#step-by-step-examples)
+  - [Building the Cost Function Curve](#building-the-cost-function-curve)
+  - [Finding the Optimal Parameter](#finding-the-optimal-parameter)
 - [Key Takeaways](#key-takeaways)
 
 ---
@@ -780,18 +786,382 @@ These questions lead us to **Gradient Descent** - the algorithm that actually fi
 
 ---
 
-## 🎉 Congratulations!
+## Lecture 3: Cost Function - Intuition I
 
-You've just learned your **first machine learning algorithm**! 🎊
+In the previous lecture, we gave the mathematical definition of the cost function. In this lecture, let's look at some examples to get intuition about **what the cost function is doing and why we want to use it**.
 
-Linear regression might seem simple, but you've actually mastered fundamental concepts that appear in every ML algorithm:
-- Training with labeled data
-- Learning patterns from examples  
-- Creating prediction functions
-- Mathematical notation and terminology
+### 🎯 The Big Picture
 
-**Keep this momentum going** - the next modules will build on these solid foundations!
+From Lecture 2, we learned:
+- **Hypothesis**: h_θ(x) = θ₀ + θ₁x
+- **Cost Function**: J(θ₀, θ₁) = (1/2m) × Σ[h_θ(x⁽ⁱ⁾) - y⁽ⁱ⁾]²
+- **Goal**: minimize J(θ₀, θ₁) to find the best fit line
+
+But **how does this actually work visually?** Lecture 3 builds the intuition!
+
+### Simplified Hypothesis for Better Understanding
+
+#### 🔧 Why Simplify?
+
+To better visualize and understand the cost function, we'll work with a **simplified hypothesis function**:
+
+```
+h_θ(x) = θ₁x    (instead of θ₀ + θ₁x)
+```
+
+**What this means:**
+- We're setting **θ₀ = 0** (no y-intercept)
+- Our line **must pass through the origin** (0, 0)
+- We only have **one parameter** θ₁ to worry about
+
+#### 📊 Simplified vs Original
+
+```mermaid
+graph LR
+    subgraph "Original (Complex)"
+        A["h_θ(x) = θ₀ + θ₁x<br/>Parameters: θ₀, θ₁<br/>Cost Function: J(θ₀, θ₁)"]
+    end
+    
+    subgraph "Simplified (Easier to Visualize)"
+        B["h_θ(x) = θ₁x<br/>Parameter: θ₁ only<br/>Cost Function: J(θ₁)"]
+    end
+    
+    A --> B
+    
+    style A fill:#ffebee
+    style B fill:#e8f5e8
+```
+
+#### 🎨 Visual Comparison
+
+**Original**: Lines can start anywhere on the y-axis
+**Simplified**: All lines must pass through (0, 0)
+
+This simplification helps us understand the core concept without getting overwhelmed by two parameters.
+
+### Two Key Functions to Understand
+
+#### 🧠 Critical Distinction
+
+There are **two different functions** we need to understand:
+
+```mermaid
+flowchart TB
+    A["🔮 Hypothesis Function<br/>h_θ(x) = θ₁x"] --> B["Function of X<br/>(for fixed θ₁)"]
+    C["💯 Cost Function<br/>J(θ₁)"] --> D["Function of θ₁<br/>(the parameter)"]
+    
+    B --> E["📈 Shows predictions<br/>for different house sizes"]
+    D --> F["📊 Shows cost<br/>for different parameter values"]
+    
+    style A fill:#e1f5fe
+    style C fill:#fff3e0
+    style E fill:#f3e5f5
+    style F fill:#e8f5e8
+```
+
+#### 📈 Hypothesis Function: h_θ(x)
+- **Input**: House size (x)
+- **Output**: Predicted price
+- **What it shows**: For a **fixed value of θ₁**, how predictions change with house size
+- **Graph axes**: x-axis = house size, y-axis = predicted price
+
+#### 📊 Cost Function: J(θ₁)  
+- **Input**: Parameter value (θ₁)
+- **Output**: Cost (how bad our fit is)
+- **What it shows**: For **different values of θ₁**, how much error we get
+- **Graph axes**: x-axis = θ₁ parameter, y-axis = cost
+
+### Understanding Cost Function Through Examples
+
+#### 🎯 What We're Learning
+
+We've seen the math behind cost functions, but now let's work through real examples to understand **what the cost function actually does** and **why it's so useful** in machine learning.
+
+#### 📊 Our Dataset - Simple and Perfect
+
+We'll use a very simple training set with **3 data points**:
+
+| Example | House Size (x) | House Price (y) | Point |
+|---------|----------------|-----------------|-------|
+| **1** | 1 | 1 | (1, 1) |
+| **2** | 2 | 2 | (2, 2) |
+| **3** | 3 | 3 | (3, 3) |
+
+**Why this dataset?** These points make a perfect straight line (y = x), which will help us clearly see when our model is perfect!
+
+#### 🔧 Making Things Simple - One Parameter Only
+
+**Complete linear regression formula:** h_θ(x) = θ₀ + θ₁x
+**Our simplified version:** h_θ(x) = θ₁x  
+
+**Why simplify?** We're setting θ₀ = 0 to focus on just one parameter (θ₁). This means:
+- Our line **must pass through the origin** (point 0,0)
+- We only need to find the **best slope** (θ₁)
+- It's easier to visualize and understand
+
+### Two Important Functions to Understand
+
+#### 📈 The Key Difference Everyone Gets Confused About
+
+There are **two different functions** in machine learning that students often mix up:
+
+**1. Hypothesis Function h_θ(x) = θ₁ × x**
+- **Input**: House size (x)
+- **Output**: Predicted price  
+- **Purpose**: Makes predictions for new houses
+- **Example**: If θ₁ = 1.5, then h_θ(2) = 3 (house size 2 → predicted price 3)
+
+**2. Cost Function J(θ₁) = (1/6) × Σ[θ₁ × x⁽ⁱ⁾ - y⁽ⁱ⁾]²**
+- **Input**: Parameter value (θ₁) 
+- **Output**: Cost (how bad our predictions are)
+- **Purpose**: Measures how good our model is
+- **Example**: If θ₁ = 1.5, then J(1.5) = 0.58 (this θ₁ gives cost 0.58)
+
+**Simple way to remember:**
+- **Hypothesis**: "Given this house size, what's the price?" 
+- **Cost function**: "Given this parameter, how good is our model?"
+
+### Step-by-Step Analysis: Complete Examples
+
+#### 🎯 Example 1: θ₁ = 1.0
+
+Step 1: Set up the hypothesis
+h_θ(x) = 1.0 × x
+
+Step 2: Calculate cost J(1.0)
+
+| x | y (actual) | h_θ(x) = 1.0×x | Error: h_θ(x) - y | Error² |
+|---|------------|-----------------|-------------------|---------|
+| 1 | 1 | 1.0×1 = 1.0 | 1.0 - 1 = 0.0 | (0.0)² = 0.00 |
+| 2 | 2 | 1.0×2 = 2.0 | 2.0 - 2 = 0.0 | (0.0)² = 0.00 |
+| 3 | 3 | 1.0×3 = 3.0 | 3.0 - 3 = 0.0 | (0.0)² = 0.00 |
+
+**J(1.0) = (1/6) × (0.00 + 0.00 + 0.00) = 0.000** ✨
+
+#### 🎯 Example 2: θ₁ = 0.5
+
+Step 1: Set up the hypothesis
+h_θ(x) = 0.5 × x
+
+Step 2: Calculate cost J(0.5)
+
+| x | y (actual) | h_θ(x) = 0.5×x | Error: h_θ(x) - y | Error² |
+|---|------------|----------------|-------------------|---------|
+| 1 | 1 | 0.5×1 = 0.5 | 0.5 - 1 = -0.5 | (-0.5)² = 0.25 |
+| 2 | 2 | 0.5×2 = 1.0 | 1.0 - 2 = -1.0 | (-1.0)² = 1.00 |
+| 3 | 3 | 0.5×3 = 1.5 | 1.5 - 3 = -1.5 | (-1.5)² = 2.25 |
+
+**J(0.5) = (1/6) × (0.25 + 1.00 + 2.25) = 3.5/6 = 0.583**
+
+#### 🎯 Example 3: θ₁ = 0
+
+Step 1: Set up the hypothesis
+h_θ(x) = 0 × x = 0
+
+Step 2: Calculate cost J(0)
+
+| x | y (actual) | h_θ(x) = 0×x | Error: h_θ(x) - y | Error² |
+|---|------------|--------------|-------------------|---------|
+| 1 | 1 | 0×1 = 0 | 0 - 1 = -1 | (-1)² = 1.00 |
+| 2 | 2 | 0×2 = 0 | 0 - 2 = -2 | (-2)² = 4.00 |
+| 3 | 3 | 0×3 = 0 | 0 - 3 = -3 | (-3)² = 9.00 |
+
+**J(0) = (1/6) × (1.00 + 4.00 + 9.00) = 14.0/6 = 2.333**
+
+#### 🎯 Example 4: θ₁ = 1.5
+
+Step 1: Set up the hypothesis
+h_θ(x) = 1.5 × x
+
+Step 2: Calculate cost J(1.5)
+
+| x | y (actual) | h_θ(x) = 1.5×x | Error: h_θ(x) - y | Error² |
+|---|------------|----------------|-------------------|---------|
+| 1 | 1 | 1.5×1 = 1.5 | 1.5 - 1 = 0.5 | (0.5)² = 0.25 |
+| 2 | 2 | 1.5×2 = 3.0 | 3.0 - 2 = 1.0 | (1.0)² = 1.00 |
+| 3 | 3 | 1.5×3 = 4.5 | 4.5 - 3 = 1.5 | (1.5)² = 2.25 |
+
+**J(1.5) = (1/6) × (0.25 + 1.00 + 2.25) = 3.5/6 = 0.583**
+
+#### 🎯 Example 5: θ₁ = 2.0
+
+Step 1: Set up the hypothesis
+h_θ(x) = 2.0 × x
+
+Step 2: Calculate cost J(2.0)
+
+| x | y (actual) | h_θ(x) = 2.0×x | Error: h_θ(x) - y | Error² |
+|---|------------|----------------|-------------------|---------|
+| 1 | 1 | 2.0×1 = 2.0 | 2.0 - 1 = 1.0 | (1.0)² = 1.00 |
+| 2 | 2 | 2.0×2 = 4.0 | 4.0 - 2 = 2.0 | (2.0)² = 4.00 |
+| 3 | 3 | 2.0×3 = 6.0 | 6.0 - 3 = 3.0 | (3.0)² = 9.00 |
+
+**J(2.0) = (1/6) × (1.00 + 4.00 + 9.00) = 14.0/6 = 2.333**
+
+#### 🎯 Example 6: θ₁ = -0.5
+
+Step 1: Set up the hypothesis
+h_θ(x) = -0.5 × x
+
+Step 2: Calculate cost J(-0.5)
+
+| x | y (actual) | h_θ(x) = -0.5×x | Error: h_θ(x) - y | Error² |
+|---|------------|-----------------|-------------------|---------|
+| 1 | 1 | -0.5×1 = -0.5 | -0.5 - 1 = -1.5 | (-1.5)² = 2.25 |
+| 2 | 2 | -0.5×2 = -1.0 | -1.0 - 2 = -3.0 | (-3.0)² = 9.00 |
+| 3 | 3 | -0.5×3 = -1.5 | -1.5 - 3 = -4.5 | (-4.5)² = 20.25 |
+
+**J(-0.5) = (1/6) × (2.25 + 9.00 + 20.25) = 31.5/6 = 5.250**
+
+#### 🎯 Example 7: θ₁ = -1.0
+
+Step 1: Set up the hypothesis
+h_θ(x) = -1.0 × x
+
+Step 2: Calculate cost J(-1.0)
+
+| x | y (actual) | h_θ(x) = -1.0×x | Error: h_θ(x) - y | Error² |
+|---|------------|-----------------|-------------------|---------|
+| 1 | 1 | -1.0×1 = -1.0 | -1.0 - 1 = -2.0 | (-2.0)² = 4.00 |
+| 2 | 2 | -1.0×2 = -2.0 | -2.0 - 2 = -4.0 | (-4.0)² = 16.00 |
+| 3 | 3 | -1.0×3 = -3.0 | -3.0 - 3 = -6.0 | (-6.0)² = 36.00 |
+
+**J(-1.0) = (1/6) × (4.00 + 16.00 + 36.00) = 56.0/6 = 9.333**
+
+### 📈 Cost Function Curve: Complete Analysis
+
+![Cost Function Curve for All 7 θ₁ Values](images/cost_function_curve_7_values.png)
+*The complete cost function curve J(θ₁) showing all 7 calculated points - notice the perfect U-shaped curve with minimum at θ₁ = 1.0*
+
+### Building the Complete Cost Function
+
+#### 📈 Creating the J(θ₁) Curve
+
+**What We Discovered by Testing Different Values:**
+
+When we tried many different θ₁ numbers, we found that each one gives us a different cost. This helps us build the complete cost function curve!
+
+**Our Test Results:**
+- θ₁ = -1.0 → Cost = 9.33 (extremely bad!)
+- θ₁ = -0.5 → Cost = 5.25 (very bad!)
+- θ₁ = 0 → Cost = 2.33 (bad)  
+- θ₁ = 0.5 → Cost = 0.58 (good)
+- θ₁ = 1.0 → Cost = 0 (perfect!) ✨
+- θ₁ = 1.5 → Cost = 0.58 (good)
+- θ₁ = 2.0 → Cost = 2.33 (bad)
+
+**The Simple Rule:**
+Each θ₁ number gives us:
+- One specific line (hypothesis)
+- One specific cost (how good that line is)
+
+![All Hypothesis Lines](images/all_hypothesis_lines.png)
+*Visual proof: Each θ₁ value creates a completely different line! The green line (θ₁ = 1.0) perfectly fits all data points.*
+
+**Easy Examples:**
+- Pick θ₁ = 1.0 → Draw line "y = x" → Get cost 0 (perfect!)
+- Pick θ₁ = 0.5 → Draw line "y = 0.5x" → Get cost 0.58 (okay)
+- Pick θ₁ = 0 → Draw line "y = 0" → Get cost 2.33 (poor)
+
+**The Big Idea:** Different parameters → Different lines → Different performance!
+
+#### 📊 Visual Representation
+
+![Cost Function Visualization](images/cost_function_complete_visualization.png)
+
+*Left: Different θ₁ values create different hypothesis lines. Right: Each θ₁ produces a different cost J(θ₁). The green star shows the optimal θ₁ = 1.0 with zero cost!*
+
+### The Optimization Objective
+
+#### 🎯 Finding the Best Parameter
+
+**What Are We Actually Trying to Do?**
+
+Our goal is simple: find the parameter θ₁ that gives us the **lowest cost** J(θ₁). This is what machine learning algorithms do - they search for the best parameters.
+
+**Looking at Our Cost Curve Results:**
+
+When we look at our cost function curve, we can see that θ₁ = 1.0 gives us the minimum cost. This isn't just lucky - it makes perfect sense! The line h_θ(x) = x passes exactly through all our data points (1,1), (2,2), (3,3).
+
+**The Big Picture - Why Zero Cost is Perfect:**
+
+For this specific dataset, we get **perfect predictions** with zero errors. This shows us the fundamental principle: **minimizing cost = finding the best line**. When our cost is zero, we have a perfect model!
+
+### 📝 Understanding the Optimization Goal
+
+#### 🎯 The Process: Finding the Best Line
+
+**Our Goal:** Find the θ₁ that minimizes J(θ₁)
+
+The Process:
+1. **Try different θ₁ values** → Get different lines
+2. **Calculate cost for each line** → Measure how good each fit is  
+3. **Pick the θ₁ with lowest cost** → That's our best model
+
+From our calculations:
+- θ₁ = 1.0 → Cost = 0.00 (**perfect fit!**) ✨
+- θ₁ = 0.5 → Cost = 0.58 (good)
+- θ₁ = 0 → Cost = 2.33 (poor)
+
+**Why θ₁ = 1.0 is optimal:** 
+Line equation h_θ(x) = 1.0 × x passes exactly through all data points (1,1), (2,2), (3,3), giving zero prediction errors and zero cost.
+
+#### 📊 Complete Analysis Results
+
+| θ₁ | Hypothesis h_θ(x) | Predictions | Errors | Squared Errors Sum | Cost J(θ₁) | Visual Description |
+|----|--------------------|-------------|---------|-------------------|------------|-------------------|
+| **-1.0** | -1.0x | (-1, -2, -3) | (-2, -4, -6) | 56.00 | **9.333** | 🔴 Extremely bad fit |
+| **-0.5** | -0.5x | (-0.5, -1, -1.5) | (-1.5, -3, -4.5) | 31.50 | **5.250** | 🔴 Very bad fit |
+| **0.0** | 0 | (0, 0, 0) | (-1, -2, -3) | 14.00 | **2.333** | 🟠 Bad fit |
+| **0.5** | 0.5x | (0.5, 1, 1.5) | (-0.5, -1, -1.5) | 3.50 | **0.583** | 🟡 Poor fit |
+| **1.0** | 1.0x | (1, 2, 3) | (0, 0, 0) | 0.00 | **0.000** ✨ | 🟢 Perfect! |
+| **1.5** | 1.5x | (1.5, 3, 4.5) | (0.5, 1, 1.5) | 3.50 | **0.583** | 🟡 Poor fit |
+| **2.0** | 2.0x | (2, 4, 6) | (1, 2, 3) | 14.00 | **2.333** | 🟠 Bad fit |
+
+#### 🎯 Key Insights
+
+Cost Function Pattern:
+- **U-shaped curve** with minimum at θ₁ = 1.0
+- **Symmetry**: Moving equal distances from θ₁ = 1.0 gives equal costs
+- Optimization goal: Find the bottom of the U-curve
+
+Different θ₁ behaviors:
+- Negative values: Wrong direction, very high costs
+- θ₁ = 0: Flat line, misses all points  
+- **θ₁ = 1.0**: Perfect fit through all data points ✨
+- θ₁ > 1: Too steep, overpredicts
+
+### Video Summary
+
+**"So, to wrap up. In this video, we looked up some plots. To understand the cost function. To do so, we simplify the algorithm. So that it only had one parameter θ₁. And we set the parameter θ₀ to be only zero. In the next video. We'll go back to the original problem formulation and look at some visualizations involving both θ₀ and θ₁. That is without setting θ₀ to zero."**
+
+#### 📊 Visual Analysis
+
+![Individual Hypothesis Graphs](images/individual_hypothesis_graphs.png)
+*Individual graphs showing different θ₁ values and their prediction errors*
+
+![Cost Function Visualization](images/cost_function_complete_visualization.png)
+*Complete visualization: hypothesis lines (left) and cost function curve (right)*
 
 ---
 
-*Ready for more? Let's dive deeper into how these algorithms actually learn! 🚀*
+## 🎓 Lecture 3 Summary
+
+### Key Learning Outcomes
+
+Core Concepts:
+1. **Function distinction**: h_θ(x) = θ₁ × x (predicts) vs J(θ₁) (measures quality)  
+2. Optimization process: Try different θ₁ → Calculate costs → Find minimum
+3. Perfect fit: θ₁ = 1.0 gives **zero cost** (line passes through all data points)
+
+Visual Understanding:
+- Cost function forms **U-shaped curve** with clear minimum
+- Different θ₁ values create different hypothesis lines
+- Optimization = finding the **bottom of the U-curve**
+
+### Real-World Application
+This same principle applies to ALL machine learning:
+- Try different parameters → Measure performance → Pick the best
+
+### Next Lecture Preview
+We'll explore the full cost function with both θ₀ and θ₁ parameters for more flexible line fitting!
