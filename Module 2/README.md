@@ -19,9 +19,9 @@ Welcome to Module 2! Now that you understand the fundamentals of Machine Learnin
 - [Lecture 3: Cost Function - Intuition I](#lecture-3-cost-function---intuition-i)
   - [Simplified Hypothesis for Better Understanding](#simplified-hypothesis-for-better-understanding)
   - [Two Key Functions to Understand](#two-key-functions-to-understand)
-  - [Step-by-Step Examples](#step-by-step-examples)
-  - [Building the Cost Function Curve](#building-the-cost-function-curve)
-  - [Finding the Optimal Parameter](#finding-the-optimal-parameter)
+  - [Step-by-Step Examples](#step-by-step-analysis-complete-examples)
+  - [Building the Cost Function Curve](#building-the-complete-cost-function)
+  - [Finding the Optimal Parameter](#the-optimization-objective)
 - [Key Takeaways](#key-takeaways)
 
 ---
@@ -289,23 +289,35 @@ flowchart LR
 - **x** = house size (input)
 - **h(x)** = predicted price (output)
 
+> Example (using simple numbers like in the image):
+>
+> - Base price (θ₀): 150 (think of this as $150k)
+> - Price per sq ft (θ₁): 0.1875 (i.e., $187.5 per sq ft)
+> - House size (x): 2,400 sq ft
+>
+> How we got θ₁ = 0.1875 (slope):
+> - Pick any two clear points on the red line (from the image), for example (1400, 200) and (3000, 500)
+> - Slope = rise ÷ run = (500 − 200) ÷ (3000 − 1400) = 300 ÷ 1600 = 0.1875
+>
+> Slope formulas (θ₁ = m):
+>
+> m = (y2 − y1) / (x2 − x1)
+>
+> m = rise / run
+
+> Slope from two points (visual):
+>
+> ![Slope from Two Points](images/slope_rise_run_example.png)
+>
+> Calculation:
+>
+> h(x) = θ₀ + θ₁x = 150 + 0.1875 × 2400 = 150 + 450 = 600  → about $600k
+
 **Visual Representation:**
-```
-Price ($) 
-    ↑
-    │        ×  ← Data points (actual house prices)
-    │      ×   ×
-    │    ×       ×
-    │  ×           ×  
-    │×     /         ×   ← Line: h(x) = θ₀ + θ₁x
-    │    /             
-    │  /                
-    │/____________________→ Size (sq ft)
-   θ₀ (y-intercept)
-   
-h_θ(x) = θ₀ + θ₁x
-Shorthand: h(x)
-```
+
+![Univariate Linear Regression Example](images/visual_representation_linear.png)
+
+Shorthand: h(x) = θ₀ + θ₁x
 
 ### 🎯 Why It's Called "Linear"
 - Creates a **straight line** (not curved)
