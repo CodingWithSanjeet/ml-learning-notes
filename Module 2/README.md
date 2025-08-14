@@ -22,6 +22,12 @@ Welcome to Module 2! Now that you understand the fundamentals of Machine Learnin
   - [Step-by-Step Examples](#step-by-step-analysis-complete-examples)
   - [Building the Cost Function Curve](#building-the-complete-cost-function)
   - [Finding the Optimal Parameter](#the-optimization-objective)
+- [Lecture 4: Cost Function - Intuition II](#lecture-4-cost-function---intuition-ii)
+  - [From 1D to 2D Parameters](#from-1d-to-2d-parameters)
+  - [The Bowl-Shaped Cost Surface](#the-bowl-shaped-cost-surface)
+  - [Contour Plots: Reading J(θ₀, θ₁)](#contour-plots-reading-jθ₀-θ₁)
+  - [Examples: Different (θ₀, θ₁) → Different Costs](#examples-different-θ₀-θ₁--different-costs)
+  - [What We Need Next](#what-we-need-next)
 - [Key Takeaways](#key-takeaways)
 
 ---
@@ -1180,3 +1186,223 @@ This same principle applies to ALL machine learning:
 
 ### Next Lecture Preview
 We'll explore the full cost function with both θ₀ and θ₁ parameters for more flexible line fitting!
+
+---
+
+## Lecture 4: Cost Function - Intuition II
+
+### From one parameter to two (θ₀ and θ₁)
+- In Lecture 3 we varied just one parameter and saw a U‑shaped cost curve J(θ₁).
+- Here we keep both parameters: θ₀ (intercept) and θ₁ (slope).
+- Hypothesis: `h_θ(x) = θ₀ + θ₁x`
+- Cost: `J(θ₀, θ₁) = (1/2m) Σ (h_θ(x⁽ⁱ⁾) − y⁽ⁱ⁾)²`
+- Goal: minimize `J(θ₀, θ₁)` by choosing the best pair (θ₀, θ₁).
+
+### The 3D bowl — what J looks like
+- When we move from a single parameter to two, J becomes a surface.
+- It looks like a smooth “bowl” in 3D: high on the sides, lowest at the center (the minimum).
+- The height above each (θ₀, θ₁) tells you the cost at that parameter pair.
+
+![3D Bowl‑Shaped Cost Surface](images/lecture4/cost_surface_lecture1.png)
+
+### Read the bowl from the top (contours)
+
+- **What it is (in simple words)**: A contour plot is just a top‑down view of the 3D bowl. Instead of heights, you see "rings" (like a map of hills).
+- **Rings = equal cost**: Every point on the same ring has the exact same cost J(θ₀, θ₁).
+- **Center = best**: Rings get smaller toward the center. The very middle is the lowest cost (the minimum) → best θ₀, θ₁.
+- **Axes**: Left–right is θ₀, up–down is θ₁.
+  Visual:
+  
+  ![Axes guide: θ₀ horizontal, θ₁ vertical](images/lecture4/axes_guide.png)
+
+  Also in 3D (showing the height J):
+  
+  ![3D Axes guide](images/lecture4/axes_guide_3d.png)
+- **Colors**: Darker/cooler colors usually mean lower cost; brighter/warmer colors mean higher cost.
+- **How to read any point (3 steps)**:
+  1) Find where your point (θ₀, θ₁) sits on the plot.
+  2) Look which ring it’s on → that tells you the cost level.
+  3) To make cost smaller, move toward the center (perpendicular to the rings).
+- **Compare two points**: The one closer to the center is better (lower J). If two points lie on the same ring, they have the same J.
+
+#### Why does each ring have the same cost?
+- Think of the 3D bowl. A ring is like slicing the bowl at a fixed height. Every point along that ring is at the same height → the same J value.
+- Mathematically, each ring is a “level set” of the function J(θ₀, θ₁): all points where J equals a constant number.
+
+#### Visual: Rings with different costs
+![Contour: Top-Down Bowl (equal-cost rings)](images/lecture4/contour_intro.png)
+
+
+### Tiny demo — table, lines and contours
+- We use a tiny mock dataset with 5 records: x = [1, 2, 3, 4, 5], y = [1, 2, 3, 4, 5].
+- For several (θ₀, θ₁) pairs, the cost is J(θ₀, θ₁) = (1/(2m)) Σ (θ₀ + θ₁x⁽ⁱ⁾ − y⁽ⁱ⁾)² with m = 5.
+
+
+### Step-by-step J calculations
+
+Case A: θ₀ = 1, θ₁ = −1.0 → hθ(x) = 1 − 1·x
+
+| x | y (actual) | hθ(x) = 1 − 1·x | Error hθ(x) − y | Error² |
+|---:|-----------:|-----------------:|-----------------:|-------:|
+| 1 | 1 | 0.0 | −1.0 | 1.00 |
+| 2 | 2 | −1.0 | −3.0 | 9.00 |
+| 3 | 3 | −2.0 | −5.0 | 25.00 |
+| 4 | 4 | −3.0 | −7.0 | 49.00 |
+| 5 | 5 | −4.0 | −9.0 | 81.00 |
+
+Sum of Error² = 1 + 9 + 25 + 49 + 81 = 165
+
+J(θ₀, θ₁) = (1/(2·5)) · 165 = 165/10 = 16.5
+
+![Case A — h(x) and contour](images/lecture4/case_A.png)
+
+Case B: θ₀ = 2, θ₁ = 0.5 → hθ(x) = 2 + 0.5·x
+
+| x | y (actual) | hθ(x) = 2 + 0.5·x | Error hθ(x) − y | Error² |
+|---:|-----------:|-------------------:|-----------------:|-------:|
+| 1 | 1 | 2.5 | 1.5 | 2.25 |
+| 2 | 2 | 3.0 | 1.0 | 1.00 |
+| 3 | 3 | 3.5 | 0.5 | 0.25 |
+| 4 | 4 | 4.0 | 0.0 | 0.00 |
+| 5 | 5 | 4.5 | −0.5 | 0.25 |
+
+Sum of Error² = 2.25 + 1.00 + 0.25 + 0.00 + 0.25 = 3.75
+
+J(θ₀, θ₁) = (1/(2·5)) · 3.75 = 3.75/10 = 0.375
+
+![Case B — h(x) and contour](images/lecture4/case_B.png)
+
+Case C: θ₀ = 0, θ₁ = 1.0 → hθ(x) = 0 + 1·x = x
+
+| x | y (actual) | hθ(x) = x | Error hθ(x) − y | Error² |
+|---:|-----------:|----------:|-----------------:|-------:|
+| 1 | 1 | 1.0 | 0.0 | 0.00 |
+| 2 | 2 | 2.0 | 0.0 | 0.00 |
+| 3 | 3 | 3.0 | 0.0 | 0.00 |
+| 4 | 4 | 4.0 | 0.0 | 0.00 |
+| 5 | 5 | 5.0 | 0.0 | 0.00 |
+
+Sum of Error² = 0.00 → J(θ₀, θ₁) = 0.000
+
+![Case C — h(x) and contour](images/lecture4/case_C.png)
+
+Case D: θ₀ = 1, θ₁ = 1.0 → hθ(x) = 1 + 1·x
+
+| x | y (actual) | hθ(x) = 1 + 1·x | Error hθ(x) − y | Error² |
+|---:|-----------:|-----------------:|-----------------:|-------:|
+| 1 | 1 | 2.0 | 1.0 | 1.00 |
+| 2 | 2 | 3.0 | 1.0 | 1.00 |
+| 3 | 3 | 4.0 | 1.0 | 1.00 |
+| 4 | 4 | 5.0 | 1.0 | 1.00 |
+| 5 | 5 | 6.0 | 1.0 | 1.00 |
+
+Sum of Error² = 5.00 → J(θ₀, θ₁) = (1/(2·5)) · 5 = 0.500
+
+![Case D — h(x) and contour](images/lecture4/case_D.png)
+
+Case E: θ₀ = −1, θ₁ = 1.0 → hθ(x) = −1 + 1·x
+
+| x | y (actual) | hθ(x) = −1 + 1·x | Error hθ(x) − y | Error² |
+|---:|-----------:|-------------------:|-----------------:|-------:|
+| 1 | 1 | 0.0 | −1.0 | 1.00 |
+| 2 | 2 | 1.0 | −1.0 | 1.00 |
+| 3 | 3 | 2.0 | −1.0 | 1.00 |
+| 4 | 4 | 3.0 | −1.0 | 1.00 |
+| 5 | 5 | 4.0 | −1.0 | 1.00 |
+
+Sum of Error² = 5.00 → J(θ₀, θ₁) = 0.500
+
+![Case E — h(x) and contour](images/lecture4/case_E.png)
+
+Case F: θ₀ = 0, θ₁ = 0.5 → hθ(x) = 0 + 0.5·x
+
+| x | y (actual) | hθ(x) = 0.5·x | Error hθ(x) − y | Error² |
+|---:|-----------:|---------------:|-----------------:|-------:|
+| 1 | 1 | 0.5 | −0.5 | 0.25 |
+| 2 | 2 | 1.0 | −1.0 | 1.00 |
+| 3 | 3 | 1.5 | −1.5 | 2.25 |
+| 4 | 4 | 2.0 | −2.0 | 4.00 |
+| 5 | 5 | 2.5 | −2.5 | 6.25 |
+
+Sum of Error² = 13.75 → J(θ₀, θ₁) = 13.75/10 = 1.375
+
+![Case F — h(x) and contour](images/lecture4/case_F.png)
+
+Case G: θ₀ = 2, θ₁ = 1.2 → hθ(x) = 2 + 1.2·x
+
+| x | y (actual) | hθ(x) = 2 + 1.2·x | Error hθ(x) − y | Error² |
+|---:|-----------:|-------------------:|-----------------:|-------:|
+| 1 | 1 | 3.2 | 2.2 | 4.84 |
+| 2 | 2 | 4.4 | 2.4 | 5.76 |
+| 3 | 3 | 5.6 | 2.6 | 6.76 |
+| 4 | 4 | 6.8 | 2.8 | 7.84 |
+| 5 | 5 | 8.0 | 3.0 | 9.00 |
+
+Sum of Error² = 34.20 → J(θ₀, θ₁) = 34.20/10 = 3.420
+
+![Case G — h(x) and contour](images/lecture4/case_G.png)
+
+Calculated J(θ₀, θ₁) on the mock dataset:
+
+
+| θ₀ | θ₁ | J(θ₀, θ₁) | Note |
+|----:|---:|----------:|------|
+| 0.0 | 1.0 | 0.000 | Perfect fit |
+| 2.0 | 0.5 | 0.375 | Matches worked example |
+| 1.0 | 1.0 | 0.500 | Parallel line, shifted up |
+| -1.0 | 1.0 | 0.500 | Parallel line, shifted down |
+| 0.0 | 0.5 | 1.375 | Too flat |
+| 2.0 | 1.2 | 3.420 | Too steep and shifted |
+| 1.0 | -1.0 | 16.500 | Wrong direction |
+
+#### Combined view (all cases at once)
+![All cases — lines and contour points](images/lecture4/case_combined.png)
+
+
+Explanation (easy words) for the combined view:
+- Left panel: each colored line is h(x) for one case (A–G). It shows how that θ₀, θ₁ predicts y for x = 1..5. Flat lines (e.g., θ₁=0) ignore x; steeper lines change quickly with x.
+- Right panel: each dot (A–G) is the same θ₀, θ₁ placed on the contour map of J(θ₀, θ₁). Dots closer to the center sit on lower-cost rings; dots farther away are on higher-cost rings.
+- Read both together: pick a case label; the left line shows its predictions; the right dot shows its cost level. Moving the dot toward the center (changing θ₀, θ₁) would lower the cost and make the line fit the data better.
+- Examples: Case C (θ₀=0, θ₁=1) lies at the center → J≈0 (perfect fit). Case B is near the center → small cost. Case A is far from the center → large cost.
+
+#### An Even Simpler Way to See It
+- Think of the 3D cost surface as a smooth bowl.
+- The plot below is that bowl in 3D. The lowest spot is the best parameters.
+
+![3D Cost Surface](images/lecture4/cost_surface.png)
+
+- If we look at the same bowl from the top, we get rings. Inner rings mean lower cost, outer rings mean higher cost.
+
+![Contour: Top-Down Bowl](images/lecture4/contour_intro.png)
+
+#### Where Do Our Examples Land?
+![Contour with Examples](images/lecture4/contour_with_examples.png)
+
+#### Contour plot (equal‑cost rings)
+![Contour: Top-Down Bowl](images/lecture4/contour_intro.png)
+
+#### What Do Those Lines Predict?
+Each line is a prediction rule h(x) = θ₀ + θ₁x. For any input x you drop a vertical line to where it hits h(x); the y‑value there is the model’s predicted y.
+
+- θ₀ moves the whole line up/down (baseline prediction when x = 0).
+- θ₁ sets the tilt: positive → predictions grow with x; 0 → flat; negative → predictions fall with x.
+- In our mock dataset:
+  - Case C (θ₀=0, θ₁=1): predicts y = x exactly → perfect.
+  - Case F (θ₀=0, θ₁=0.5): too flat → underpredicts more as x increases.
+  - Case D (θ₀=1, θ₁=1): parallel to perfect line but always +1 high.
+  - Case A (θ₀=1, θ₁=−1): wrong direction → predictions decrease as x grows.
+![Hypothesis Examples Grid](images/lecture4/hypothesis_examples_grid.png)
+
+### Examples: Different (θ₀, θ₁) → Different Costs (our mock dataset)
+- 0.0, 1.0 → J=0.000: Perfect fit. Line y = x passes through all points (1→1 … 5→5), so zero error.
+- 2.0, 0.5 → J=0.375: Matches worked example. Line starts at 2 and rises slowly; close to data but underpredicts at larger x.
+- 1.0, 1.0 → J=0.500: Parallel to the perfect line but shifted up by 1; every point is off by +1.
+- −1.0, 1.0 → J=0.500: Parallel but shifted down by 1; every point is off by −1.
+- 0.0, 0.5 → J=1.375: Too flat; underpredicts more and more as x grows.
+- 2.0, 1.2 → J=3.420: Too steep and shifted up; overpredicts increasingly with x.
+- 1.0, −1.0 → J=16.500: Wrong direction; line goes down while data goes up, giving very large errors.
+
+### What We Need Next
+- Manually “trying” many (θ₀, θ₁) pairs is slow and won’t scale to higher dimensions.
+- We need an automatic method to find the minimum of J(θ₀, θ₁).
+- In the next lecture we’ll introduce gradient descent to efficiently search for the best parameters.
