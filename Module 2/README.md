@@ -40,6 +40,12 @@ Welcome to Module 2! Now that you understand the fundamentals of Machine Learnin
   - [Gradient descent formula](#gradient-descent-formula)
   - [Simultaneous updates (the correct way)](#simultaneous-updates-the-correct-way)
   - [Why this helps](#why-this-helps)
+- [Lecture 6 – Gradient Descent Intuition](#lecture-6--gradient-descent-intuition)
+  - [1D intuition: what the derivative tells us](#1d-intuition-what-the-derivative-tells-us)
+  - [Learning rate α: too small vs too large](#learning-rate-α-too-small-vs-too-large)
+  - [At a local minimum: derivative = 0](#at-a-local-minimum-derivative--0)
+  - [Automatic step shrinking near minima](#automatic-step-shrinking-near-minima)
+  - [Recap](#recap)
 - [Key Takeaways](#key-takeaways)
 
 ---
@@ -1514,7 +1520,9 @@ Important note for context: these plots are over the parameter space `(θ₀, θ
 
 The gradient descent update used here:
 
-\[\theta_j := \theta_j - \alpha\; \frac{\partial J(\theta_0,\theta_1)}{\partial \theta_j}\]
+$$
+\theta_j := \theta_j - \alpha \, \frac{\partial J(\theta_0,\theta_1)}{\partial \theta_j}
+$$
 
 Where:
 - `θ_j` = a parameter being updated (e.g., `θ₀`, `θ₁`)
@@ -1525,7 +1533,9 @@ Where:
 ### Gradient descent formula
 Update rule for each parameter:
 
-\[\theta_j := \theta_j - \alpha\; \frac{\partial J(\theta_0,\theta_1)}{\partial \theta_j}\]
+$$
+\theta_j := \theta_j - \alpha \, \frac{\partial J(\theta_0,\theta_1)}{\partial \theta_j}
+$$
 
 - “:=” means assignment (overwrite the variable).
 - α (alpha) is the learning rate (step size).
@@ -1566,3 +1576,100 @@ General (many parameters): for j = 0…n, compute all tempⱼ = θⱼ − α · 
 ### Why this helps
 - Instead of guessing many (θ₀, θ₁) pairs, gradient descent “walks downhill” automatically to reduce J.
 - In the next lecture we will plug in the specific derivative formulas for our linear‑regression cost function and run the algorithm.
+
+---
+
+## Lecture 6 – Gradient Descent Intuition
+
+In the previous lecture We already saw the math definition of gradient descent.
+
+$$
+\theta_j := \theta_j - \alpha \, \frac{\partial J(\theta_0,\theta_1)}{\partial \theta_j}
+$$
+
+Now, let’s slow down and build intuition — why each part of the update rule works, and how it behaves in different situations.
+
+We’ll simplify things by looking at a 1D cost function J(θ₁), so we can easily visualize it as a curve.
+
+$$
+\theta_1 := \theta_1 - \alpha \, \frac{\partial J(\theta_1)}{\partial \theta_1}
+$$
+
+Where:
+- **θ₁**: the parameter we’re adjusting
+- **α**: learning rate (how big a step we take each time)
+- **d/dθ₁ J(θ₁)**: the slope of the cost curve at the current point
+
+We’ll look at a single‑parameter cost **J(θ₁)** so we can visualize the curve and the slope directly.
+
+### 1D intuition: what the derivative tells us
+- Consider a 1‑parameter cost `J(θ₁)` so we can visualize it in 1D.
+- The derivative `dJ/dθ₁` here tells us the slope of the tangent line at the current point on the curve.
+  
+  ![Derivative equals tangent slope](images/lecture6/derivative_tangent.png)
+- At any point, take the tangent line. Its slope is the derivative `dJ/dθ₁`.
+
+  #### Positive slope → move left
+  If our point is to the right of the minimum, the slope (derivative) is positive.
+
+  - If the slope is **positive** at your current `θ₁`, the update `θ₁ := θ₁ − α·(positive)` moves left (toward smaller `θ₁`) — downhill.
+
+  - The formula subtracts a positive number from θ₁, making θ₁ smaller → we move left toward the minimum.
+
+  **Analogy:**  Imagine standing on the right side of a hill — the ground is sloping upward to your right, so you step left to go downhill.
+
+   ![Positive slope → move left](images/lecture6/gradient_positive_slope.png)
+
+
+  #### Negative slope → move right
+  If our point is to the left of the minimum, the slope is negative.
+
+  - If the slope is **negative**, the update becomes `θ₁ := θ₁ − α·(negative number)` which moves right (toward larger `θ₁`) — also downhill.
+
+  - Subtracting a negative number means adding to θ₁ → we move right toward the minimum.
+
+  **Analogy:** You’re on the left side of a hill — the ground slopes upward to your left, so you step right.
+
+  ![Negative slope → move right](images/lecture6/gradient_negative_slope.png)
+
+- Intuition: the derivative’s sign tells you which way is down; the magnitude tells you how steep it is.
+
+### Learning rate α: too small vs too large
+#### Small learning rate (α) → slow progress
+  If α is too small, each step is tiny.
+  - **Too small α**: takes tiny “baby steps” → many iterations, slow progress.
+  - We still move toward the minimum, but it takes forever.
+
+**Analogy:** Like walking toward your destination by taking baby steps — you’ll get there, but slowly.
+![Small α → tiny steps (slow)](images/lecture6/gd_alpha_small.png)
+
+#### Large learning rate (α) → overshooting
+If α is too large, we may jump past the minimum.
+- **Too large α**: overshoots the minimum; cost can bounce back and forth and even diverge.
+- The next step’s slope points back, and we overshoot again — possibly bouncing further away.
+
+**Analogy:** Like running downhill with huge leaps — you overshoot and keep zig-zagging.
+
+![Large α → overshoot/oscillate](images/lecture6/gd_alpha_large.png)
+
+- Good practice: start with a modest α, watch the cost curve; if it increases or oscillates, reduce α.
+
+
+### At a local minimum: derivative = 0
+- At a local optimum the tangent slope is zero (`dJ/dθ = 0`).
+- Update becomes `θ := θ − α·0 = θ` → no change. This is desirable: once at the minimum, stay there.
+
+![At local minimum: derivative = 0](images/lecture6/gd_local_minimum_zero_derivative.png)
+
+### Automatic step shrinking near minima
+- As you approach the minimum, the derivative’s magnitude naturally gets smaller.
+- Therefore the update `α·(derivative)` becomes smaller too → gradient descent takes progressively shorter steps and converges without needing to manually decay α.
+
+**Analogy:** Like rolling a ball into a valley — it moves fast at first, then slows down as it reaches the bottom.
+
+![Automatic step shrinking near minimum](images/lecture6/gd_step_shrinking.png)
+
+### Recap
+- The derivative term provides direction (sign) and steepness (magnitude).
+- The learning rate α scales the step size.
+- Together they move parameters downhill; steps naturally shrink as you approach a minimum, and they stop when the derivative becomes zero.
