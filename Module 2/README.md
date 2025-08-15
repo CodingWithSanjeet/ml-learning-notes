@@ -1437,8 +1437,9 @@ Each line is a prediction rule h(x) = θ₀ + θ₁x. For any input x you drop a
 - The same idea works for many parameters J(θ₀, θ₁, …, θₙ); we keep two parameters here for simple notation.
 
 ### What is the gradient?
-- The gradient of the cost with respect to a parameter tells us the direction and rate of change of the error if we change that parameter.
-- To reduce error, we move **against** the gradient (downhill).
+- The gradient of the cost function with respect to a parameter (like θ₀, θ₁) tells us the **direction and rate of change** of the error if we change that parameter.
+
+- We want to move **against** the gradient (downhill) to reduce the error.
 
 ![1D Gradient Example](images/lecture5/gradient_1d_example.png)
 
