@@ -28,6 +28,18 @@ Welcome to Module 2! Now that you understand the fundamentals of Machine Learnin
   - [Contour Plots: Reading J(θ₀, θ₁)](#contour-plots-reading-jθ₀-θ₁)
   - [Examples: Different (θ₀, θ₁) → Different Costs](#examples-different-θ₀-θ₁--different-costs)
   - [What We Need Next](#what-we-need-next)
+- [Lecture 5 – Gradient Descent](#lecture-5--gradient-descent)
+  - [Recap & context](#recap--context)
+  - [Problem setup](#problem-setup)
+  - [What is the gradient?](#what-is-the-gradient)
+  - [What is gradient descent?](#what-is-gradient-descent)
+  - [Analogy: blindfolded in a valley](#analogy-blindfolded-in-a-valley)
+  - [Idea of gradient descent](#idea-of-gradient-descent)
+  - [Local minima behavior](#local-minima-behavior)
+  - [How does gradient descent work? (Step-by-step)](#how-does-gradient-descent-work-step-by-step)
+  - [Gradient descent formula](#gradient-descent-formula)
+  - [Simultaneous updates (the correct way)](#simultaneous-updates-the-correct-way)
+  - [Why this helps](#why-this-helps)
 - [Key Takeaways](#key-takeaways)
 
 ---
@@ -1232,6 +1244,10 @@ We'll explore the full cost function with both θ₀ and θ₁ parameters for mo
 #### Visual: Rings with different costs
 ![Contour: Top-Down Bowl (equal-cost rings)](images/lecture4/contour_intro.png)
 
+Additional example — many points on the same ring (same cost):
+
+![Points on the same ring → same J](images/lecture4/contour_same_ring.png)
+
 
 ### Tiny demo — table, lines and contours
 - We use a tiny mock dataset with 5 records: x = [1, 2, 3, 4, 5], y = [1, 2, 3, 4, 5].
@@ -1406,3 +1422,146 @@ Each line is a prediction rule h(x) = θ₀ + θ₁x. For any input x you drop a
 - Manually “trying” many (θ₀, θ₁) pairs is slow and won’t scale to higher dimensions.
 - We need an automatic method to find the minimum of J(θ₀, θ₁).
 - In the next lecture we’ll introduce gradient descent to efficiently search for the best parameters.
+
+---
+
+## Lecture 5 – Gradient Descent
+
+### Recap & context
+- We already defined the cost function J in earlier lectures.
+- Goal now: introduce Gradient Descent, a general algorithm to minimize J.
+- It is used beyond linear regression; we will first explain it generally for J(θ₀, θ₁), then apply it to our linear‑regression J.
+
+### Problem setup
+- We want to minimize some function J(θ₀, θ₁).
+- The same idea works for many parameters J(θ₀, θ₁, …, θₙ); we keep two parameters here for simple notation.
+
+### What is the gradient?
+- The gradient of the cost with respect to a parameter tells us the direction and rate of change of the error if we change that parameter.
+- To reduce error, we move **against** the gradient (downhill).
+
+![1D Gradient Example](images/lecture5/gradient_1d_example.png)
+
+Example (single parameter θ₁):
+- Suppose our simple model is `h(x) = θ₁ x` and cost on a tiny dataset turns out to be `J(θ₁) = (θ₁ − 1)²`.
+- The derivative is `dJ/dθ₁ = 2(θ₁ − 1)`. This derivative is the **gradient** in 1‑D — it is the **rate of change of the error** with respect to `θ₁`.
+  - If `θ₁ = 0.5`, then the gradient is `−1`. Interpretation: if you increase `θ₁` a tiny amount (say `+0.01`), the cost changes by roughly `−0.01` (it goes down). So step in the positive direction toward `θ₁ = 1`.
+  - If `θ₁ = 1.5`, then the gradient is `+1`. Interpretation: a small increase would raise the cost by about `+0.01`; to reduce error you must step in the negative direction toward `θ₁ = 1`.
+- In both cases, going **opposite** the gradient heads to the minimum at `θ₁ = 1`.
+
+Beginner‑friendly numbers (one tiny step):
+- Start at `θ₁ = 0.0`, learning rate `α = 0.1`.
+- Gradient at `θ₁ = 0.0` is `dJ/dθ₁ = 2(0 − 1) = −2`.
+- Update rule: `θ₁ := θ₁ − α · dJ/dθ₁ = 0 − 0.1 · (−2) = +0.2`.
+- Cost went from `J(0.0) = (0 − 1)² = 1` down to `J(0.2) = (0.2 − 1)² = 0.64`.
+- We moved opposite the gradient (toward +1) and the cost decreased — success! Repeat to get closer to `θ₁ = 1`.
+
+### What is gradient descent?
+- A method to find the best parameters (e.g., θ₀, θ₁) by minimizing the cost `J(θ₀, θ₁)` computed from training data.
+- Think: searching for the lowest point in a hilly surface where height = cost (error). We take small steps downhill until we reach the bottom.
+
+### Analogy: blindfolded in a valley
+- Imagine you are walking in a valley blindfolded and want to reach the very bottom.
+- You feel around with your feet, check which direction goes most downhill, and step that way.
+- Each step you take is "gradient descent"—slowly getting to the lowest error.
+
+![GD path on 3D surface](images/lecture5/blindfolded.png)
+
+### Idea of gradient descent
+
+Have some function: **J(θ₀, θ₁)**
+
+Want: **minimize J(θ₀, θ₁)**
+
+Outline:
+- Start with some **θ₀, θ₁** *(say θ₀ = 0, θ₁ = 0)*
+- Keep changing **θ₀, θ₁** to reduce **J(θ₀, θ₁)**
+- Repeat until we (hopefully) end up at a **minimum** (ideally, the lowest possible value).
+
+Beginner-friendly reading of the idea:
+- Think of standing on a hill at some point (your current `θ₀`and `θ₁`).
+
+- The height of the hill at that point is the value of `J(θ₀, θ₁)` — bigger hill means bigger error. 
+- You want to get to the bottom of the hill where error is smallest.
+- You look around you in all directions to find out where the hill slopes down most steeply.
+- Take a small step down that way.
+- Repeat: keep looking for the steepest downhill and take steps until you can’t go down anymore.
+
+Important note for context: these plots are over the parameter space `(θ₀, θ₁)`, not the training data `(x, y)`. Every point on this map is a different model, and its height is the cost of that model.
+
+### Local minima behavior
+- Where you start can matter. Nearby starting points can land in different local minima.
+
+<div style="display: flex; gap: 10px;">
+  <img src="images/lecture5/gd_surface_local_minima1.png" alt="Local minima example 1" width="49%"/>
+  <img src="images/lecture5/gd_surface_local_minima2.png" alt="Local minima example 2" width="49%"/>
+</div>
+
+### How does gradient descent work? (Step-by-step)
+
+1. **Pick starting values**: Choose any starting guess for `θ₀` and `θ₁` (often both 0).
+2. **Calculate the cost**: Plug those values into your hypothesis (prediction) formula and see how far off you are from the real answers.
+3. **Find the steepest downhill direction**: Compute the partial derivatives `∂J/∂θ₀` and `∂J/∂θ₁` at the current point. They tell you  `If I change θ₀ or θ₁ a little, does the error go up or down?`
+4. **Take a step downhill**: Use the learning rate (α) to control the size of your step:
+    - Small `α` → slower but safer
+    - Large `α` → faster but can overshoot/diverge
+5. **Update parameters simultaneously**: Use the same old `θ` values to compute all updates, then assign them together.
+6. **Repeat**: 
+    - Keep repeating steps 2-5: measure, calculate slope, step, and update
+
+    - Stop when no step can lower the error much (you reached the bottom)
+
+The gradient descent update used here:
+
+\[\theta_j := \theta_j - \alpha\; \frac{\partial J(\theta_0,\theta_1)}{\partial \theta_j}\]
+
+Where:
+- `θ_j` = a parameter being updated (e.g., `θ₀`, `θ₁`)
+- `α` = learning rate (step size)
+- `J(θ₀, θ₁)` = cost/error function
+- `∂/∂θ_j` = derivative with respect to `θ_j` (gives best downhill direction)
+
+### Gradient descent formula
+Update rule for each parameter:
+
+\[\theta_j := \theta_j - \alpha\; \frac{\partial J(\theta_0,\theta_1)}{\partial \theta_j}\]
+
+- “:=” means assignment (overwrite the variable).
+- α (alpha) is the learning rate (step size).
+  - Large α → bigger steps, can overshoot/diverge.
+  - Small α → tiny steps, slower convergence.
+- The derivative term is “the slope” of J with respect to θⱼ.
+
+Visual intuition: the distance between successive markers (e.g., stars) along the path equals the step size controlled by α. The direction of the step comes from the partial derivative.
+
+Illustrations:
+
+![GD path on 3D surface](images/lecture5/gd_surface_path_updated.png)
+
+### Simultaneous updates (the correct way)
+Compute the right‑hand sides first, then update both parameters at the same time.
+
+```text
+temp0 = θ₀ - α * ∂J(θ₀, θ₁)/∂θ₀
+temp1 = θ₁ - α * ∂J(θ₀, θ₁)/∂θ₁
+θ₀ := temp0
+θ₁ := temp1
+```
+Incorrect (sequential) — do not do this:
+
+```text
+temp0 = θ₀ - α * ∂J(θ₀, θ₁)/∂θ₀
+θ₀ := temp0
+temp1 = θ₁ - α * ∂J(θ₀, θ₁)/∂θ₁
+θ₁ := temp1
+```
+
+![Simultaneous vs incorrect update](images/lecture5/simultaneous_update.png)
+
+Avoid: updating θ₀ and then using that new value to compute θ₁’s update. That changes the algorithm.
+
+General (many parameters): for j = 0…n, compute all tempⱼ = θⱼ − α · (∂J/∂θⱼ) using the current θ values; then assign θⱼ := tempⱼ for all j simultaneously.
+
+### Why this helps
+- Instead of guessing many (θ₀, θ₁) pairs, gradient descent “walks downhill” automatically to reduce J.
+- In the next lecture we will plug in the specific derivative formulas for our linear‑regression cost function and run the algorithm.
