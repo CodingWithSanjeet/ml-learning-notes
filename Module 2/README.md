@@ -1,6 +1,10 @@
-# Module 2: Supervised Learning - Linear Regression Basics 📈
+## Module 2: Linear Regression with One Variable 📈
 
-Welcome to Module 2! Now that you understand the fundamentals of Machine Learning, let's dive into your first algorithm: **Linear Regression**. This is where theory meets practice!
+Welcome to Module 2. Here you’ll build an intuitive, beginner‑friendly understanding of univariate (one‑variable) linear regression:
+- What the hypothesis is: hθ(x) = θ₀ + θ₁x
+- How we measure error with the cost J(θ₀, θ₁)
+- How gradient descent updates θ₀, θ₁ to find the best‑fit line
+Along the way, you’ll see simple tables, clear pictures, and step‑by‑step visuals of the algorithm in action.
 
 ## 📚 Table of Contents
 - [Lecture 1: Model Representation](#lecture-1-model-representation)
@@ -46,6 +50,14 @@ Welcome to Module 2! Now that you understand the fundamentals of Machine Learnin
   - [At a local minimum: derivative = 0](#at-a-local-minimum-derivative--0)
   - [Automatic step shrinking near minima](#automatic-step-shrinking-near-minima)
   - [Recap](#recap)
+- [Lecture 7 – Gradient Descent for Linear Regression](#lecture-7--gradient-descent-for-linear-regression)
+  - [Overview](#overview)
+  - [Deriving the gradients of J(θ₀, θ₁)](#deriving-the-gradients-of-jtheta0-theta1)
+  - [Gradient Descent Algorithm (simultaneous updates)](#gradient-descent-algorithm-simultaneous-updates)
+  - [Why Gradient Descent Works for Linear Regression](#why-gradient-descent-works-for-linear-regression)
+  - [Algorithm in action](#algorithm-in-action)
+  - [Batch gradient descent](#batch-gradient-descent)
+  - [Normal equation (alternative)](#normal-equation-alternative)
 - [Key Takeaways](#key-takeaways)
 
 ---
@@ -1209,6 +1221,7 @@ We'll explore the full cost function with both θ₀ and θ₁ parameters for mo
 
 ## Lecture 4: Cost Function - Intuition II
 
+<a id="from-1d-to-2d-parameters"></a>
 ### From one parameter to two (θ₀ and θ₁)
 - In Lecture 3 we varied just one parameter and saw a U‑shaped cost curve J(θ₁).
 - Here we keep both parameters: θ₀ (intercept) and θ₁ (slope).
@@ -1216,13 +1229,15 @@ We'll explore the full cost function with both θ₀ and θ₁ parameters for mo
 - Cost: `J(θ₀, θ₁) = (1/2m) Σ (h_θ(x⁽ⁱ⁾) − y⁽ⁱ⁾)²`
 - Goal: minimize `J(θ₀, θ₁)` by choosing the best pair (θ₀, θ₁).
 
+<a id="the-bowl-shaped-cost-surface"></a>
 ### The 3D bowl — what J looks like
 - When we move from a single parameter to two, J becomes a surface.
-- It looks like a smooth “bowl” in 3D: high on the sides, lowest at the center (the minimum).
+- It looks like a smooth "bowl" in 3D: high on the sides, lowest at the center (the minimum).
 - The height above each (θ₀, θ₁) tells you the cost at that parameter pair.
 
 ![3D Bowl‑Shaped Cost Surface](images/lecture4/cost_surface_lecture1.png)
 
+<a id="contour-plots-reading-jθ₀-θ₁"></a>
 ### Read the bowl from the top (contours)
 
 - **What it is (in simple words)**: A contour plot is just a top‑down view of the 3D bowl. Instead of heights, you see "rings" (like a map of hills).
@@ -1239,13 +1254,13 @@ We'll explore the full cost function with both θ₀ and θ₁ parameters for mo
 - **Colors**: Darker/cooler colors usually mean lower cost; brighter/warmer colors mean higher cost.
 - **How to read any point (3 steps)**:
   1) Find where your point (θ₀, θ₁) sits on the plot.
-  2) Look which ring it’s on → that tells you the cost level.
+  2) Look which ring it's on → that tells you the cost level.
   3) To make cost smaller, move toward the center (perpendicular to the rings).
 - **Compare two points**: The one closer to the center is better (lower J). If two points lie on the same ring, they have the same J.
 
 #### Why does each ring have the same cost?
 - Think of the 3D bowl. A ring is like slicing the bowl at a fixed height. Every point along that ring is at the same height → the same J value.
-- Mathematically, each ring is a “level set” of the function J(θ₀, θ₁): all points where J equals a constant number.
+- Mathematically, each ring is a "level set" of the function J(θ₀, θ₁): all points where J equals a constant number.
 
 #### Visual: Rings with different costs
 ![Contour: Top-Down Bowl (equal-cost rings)](images/lecture4/contour_intro.png)
@@ -1391,7 +1406,7 @@ Explanation (easy words) for the combined view:
 - Think of the 3D cost surface as a smooth bowl.
 - The plot below is that bowl in 3D. The lowest spot is the best parameters.
 
-![3D Cost Surface](images/lecture4/cost_surface.png)
+![3D Cost Surface](images/lecture7/bowl_shaped.png)
 
 - If we look at the same bowl from the top, we get rings. Inner rings mean lower cost, outer rings mean higher cost.
 
@@ -1404,7 +1419,7 @@ Explanation (easy words) for the combined view:
 ![Contour: Top-Down Bowl](images/lecture4/contour_intro.png)
 
 #### What Do Those Lines Predict?
-Each line is a prediction rule h(x) = θ₀ + θ₁x. For any input x you drop a vertical line to where it hits h(x); the y‑value there is the model’s predicted y.
+Each line is a prediction rule h(x) = θ₀ + θ₁x. For any input x you drop a vertical line to where it hits h(x); the y‑value there is the model's predicted y.
 
 - θ₀ moves the whole line up/down (baseline prediction when x = 0).
 - θ₁ sets the tilt: positive → predictions grow with x; 0 → flat; negative → predictions fall with x.
@@ -1415,6 +1430,7 @@ Each line is a prediction rule h(x) = θ₀ + θ₁x. For any input x you drop a
   - Case A (θ₀=1, θ₁=−1): wrong direction → predictions decrease as x grows.
 ![Hypothesis Examples Grid](images/lecture4/hypothesis_examples_grid.png)
 
+<a id="examples-different-θ₀-θ₁--different-costs"></a>
 ### Examples: Different (θ₀, θ₁) → Different Costs (our mock dataset)
 - 0.0, 1.0 → J=0.000: Perfect fit. Line y = x passes through all points (1→1 … 5→5), so zero error.
 - 2.0, 0.5 → J=0.375: Matches worked example. Line starts at 2 and rises slowly; close to data but underpredicts at larger x.
@@ -1425,9 +1441,9 @@ Each line is a prediction rule h(x) = θ₀ + θ₁x. For any input x you drop a
 - 1.0, −1.0 → J=16.500: Wrong direction; line goes down while data goes up, giving very large errors.
 
 ### What We Need Next
-- Manually “trying” many (θ₀, θ₁) pairs is slow and won’t scale to higher dimensions.
+- Manually "trying" many (θ₀, θ₁) pairs is slow and won't scale to higher dimensions.
 - We need an automatic method to find the minimum of J(θ₀, θ₁).
-- In the next lecture we’ll introduce gradient descent to efficiently search for the best parameters.
+- In the next lecture we'll introduce gradient descent to efficiently search for the best parameters.
 
 ---
 
@@ -1492,7 +1508,7 @@ Beginner-friendly reading of the idea:
 - You want to get to the bottom of the hill where error is smallest.
 - You look around you in all directions to find out where the hill slopes down most steeply.
 - Take a small step down that way.
-- Repeat: keep looking for the steepest downhill and take steps until you can’t go down anymore.
+- Repeat: keep looking for the steepest downhill and take steps until you can't go down anymore.
 
 Important note for context: these plots are over the parameter space `(θ₀, θ₁)`, not the training data `(x, y)`. Every point on this map is a different model, and its height is the cost of that model.
 
@@ -1537,11 +1553,11 @@ $$
 \theta_j := \theta_j - \alpha \, \frac{\partial J(\theta_0,\theta_1)}{\partial \theta_j}
 $$
 
-- “:=” means assignment (overwrite the variable).
+- ":= means assignment (overwrite the variable).
 - α (alpha) is the learning rate (step size).
   - Large α → bigger steps, can overshoot/diverge.
   - Small α → tiny steps, slower convergence.
-- The derivative term is “the slope” of J with respect to θⱼ.
+- The derivative term is "the slope" of J with respect to θⱼ.
 
 Visual intuition: the distance between successive markers (e.g., stars) along the path equals the step size controlled by α. The direction of the step comes from the partial derivative.
 
@@ -1569,12 +1585,12 @@ temp1 = θ₁ - α * ∂J(θ₀, θ₁)/∂θ₁
 
 ![Simultaneous vs incorrect update](images/lecture5/simultaneous_update.png)
 
-Avoid: updating θ₀ and then using that new value to compute θ₁’s update. That changes the algorithm.
+Avoid: updating θ₀ and then using that new value to compute θ₁'s update. That changes the algorithm.
 
 General (many parameters): for j = 0…n, compute all tempⱼ = θⱼ − α · (∂J/∂θⱼ) using the current θ values; then assign θⱼ := tempⱼ for all j simultaneously.
 
 ### Why this helps
-- Instead of guessing many (θ₀, θ₁) pairs, gradient descent “walks downhill” automatically to reduce J.
+- Instead of guessing many (θ₀, θ₁) pairs, gradient descent "walks downhill" automatically to reduce J.
 - In the next lecture we will plug in the specific derivative formulas for our linear‑regression cost function and run the algorithm.
 
 ---
@@ -1587,20 +1603,20 @@ $$
 \theta_j := \theta_j - \alpha \, \frac{\partial J(\theta_0,\theta_1)}{\partial \theta_j}
 $$
 
-Now, let’s slow down and build intuition — why each part of the update rule works, and how it behaves in different situations.
+Now, let's slow down and build intuition — why each part of the update rule works, and how it behaves in different situations.
 
-We’ll simplify things by looking at a 1D cost function J(θ₁), so we can easily visualize it as a curve.
+We'll simplify things by looking at a 1D cost function J(θ₁), so we can easily visualize it as a curve.
 
 $$
 \theta_1 := \theta_1 - \alpha \, \frac{\partial J(\theta_1)}{\partial \theta_1}
 $$
 
 Where:
-- **θ₁**: the parameter we’re adjusting
+- **θ₁**: the parameter we're adjusting
 - **α**: learning rate (how big a step we take each time)
 - **d/dθ₁ J(θ₁)**: the slope of the cost curve at the current point
 
-We’ll look at a single‑parameter cost **J(θ₁)** so we can visualize the curve and the slope directly.
+We'll look at a single‑parameter cost **J(θ₁)** so we can visualize the curve and the slope directly.
 
 ### 1D intuition: what the derivative tells us
 - Consider a 1‑parameter cost `J(θ₁)` so we can visualize it in 1D.
@@ -1628,25 +1644,25 @@ We’ll look at a single‑parameter cost **J(θ₁)** so we can visualize the c
 
   - Subtracting a negative number means adding to θ₁ → we move right toward the minimum.
 
-  **Analogy:** You’re on the left side of a hill — the ground slopes upward to your left, so you step right.
+  **Analogy:** You're on the left side of a hill — the ground slopes upward to your left, so you step right.
 
   ![Negative slope → move right](images/lecture6/gradient_negative_slope.png)
 
-- Intuition: the derivative’s sign tells you which way is down; the magnitude tells you how steep it is.
+- Intuition: the derivative's sign tells you which way is down; the magnitude tells you how steep it is.
 
 ### Learning rate α: too small vs too large
 #### Small learning rate (α) → slow progress
   If α is too small, each step is tiny.
-  - **Too small α**: takes tiny “baby steps” → many iterations, slow progress.
+  - **Too small α**: takes tiny "baby steps" → many iterations, slow progress.
   - We still move toward the minimum, but it takes forever.
 
-**Analogy:** Like walking toward your destination by taking baby steps — you’ll get there, but slowly.
+**Analogy:** Like walking toward your destination by taking baby steps — you'll get there, but slowly.
 ![Small α → tiny steps (slow)](images/lecture6/gd_alpha_small.png)
 
 #### Large learning rate (α) → overshooting
 If α is too large, we may jump past the minimum.
 - **Too large α**: overshoots the minimum; cost can bounce back and forth and even diverge.
-- The next step’s slope points back, and we overshoot again — possibly bouncing further away.
+- The next step's slope points back, and we overshoot again — possibly bouncing further away.
 
 **Analogy:** Like running downhill with huge leaps — you overshoot and keep zig-zagging.
 
@@ -1662,7 +1678,7 @@ If α is too large, we may jump past the minimum.
 ![At local minimum: derivative = 0](images/lecture6/gd_local_minimum_zero_derivative.png)
 
 ### Automatic step shrinking near minima
-- As you approach the minimum, the derivative’s magnitude naturally gets smaller.
+- As you approach the minimum, the derivative's magnitude naturally gets smaller.
 - Therefore the update `α·(derivative)` becomes smaller too → gradient descent takes progressively shorter steps and converges without needing to manually decay α.
 
 **Analogy:** Like rolling a ball into a valley — it moves fast at first, then slows down as it reaches the bottom.
@@ -1673,3 +1689,202 @@ If α is too large, we may jump past the minimum.
 - The derivative term provides direction (sign) and steepness (magnitude).
 - The learning rate α scales the step size.
 - Together they move parameters downhill; steps naturally shrink as you approach a minimum, and they stop when the derivative becomes zero.
+
+---
+
+## Lecture 7 – Gradient Descent for Linear Regression
+
+### Overview
+Before this lecture, we learned:
+- **Linear regression model:** $h_\theta(x)=\theta_0+\theta_1 x$ (predicts $y$ with a straight line)
+- **Squared error cost:** $J(\theta_0,\theta_1)$ (measures how far predictions are from actual data)
+- **Gradient descent:** iterative method to find parameters `θ₀` and `θ₁` that minimize $J(\theta_0,\theta_1)$
+
+We now combine the pieces: linear hypothesis, squared‑error cost, and gradient descent, to get a full training algorithm for fitting a straight line.
+
+<table style="width:100%; margin:0 auto; text-align:center;">
+  <colgroup>
+    <col width="50%" />
+    <col width="50%" />
+  </colgroup>
+  <thead>
+    <tr>
+      <th width="50%" style="text-align:center;">Gradient descent algorithm</th>
+      <th width="50%" style="text-align:center;">Linear Regression model</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align:center; vertical-align:top;">
+        repeat until convergence {<br>
+        $\theta_j := \theta_j - \alpha \, \frac{\partial}{\partial \theta_j} J(\theta_0,\theta_1)$ $(j=0,1)$<br>
+        }<br>
+        <em>Use simultaneous updates for</em> $\theta_0$ <em>and</em> $\theta_1$.
+      </td>
+      <td style="text-align:center; vertical-align:top;">
+        Hypothesis: $h_\theta(x) = \theta_0 + \theta_1 x$<br>
+        Cost (squared error):<br>
+        $J(\theta_0,\theta_1) = \frac{1}{2m}\sum_{i=1}^{m} ( h_\theta(x^{(i)}) - y^{(i)} )^2$
+      </td>
+    </tr>
+  </tbody>
+  </table>
+
+<a id="deriving-the-gradients-of-jtheta0-theta1"></a>
+### Deriving the gradients of J(θ₀, θ₁)
+We need the derivatives of `J` for both parameters.
+
+#### Step 1: Write the cost function in terms of the hypothesis
+Hypothesis:
+
+$$
+h_\theta(x) = \theta_0 + \theta_1 x
+$$
+
+Plug into the cost function:
+
+$$
+J(\theta_0,\theta_1)
+= \frac{1}{2m} \sum_{i=1}^{m} \big( \theta_0 + \theta_1 x^{(i)} - y^{(i)} \big)^2
+= \frac{1}{2m} \sum_{i=1}^{m} \big( h_\theta(x^{(i)}) - y^{(i)} \big)^2
+$$
+
+#### Step 2: Derivative with respect to $\theta_0$
+- For each term, use the chain rule on $\big(\theta_0 + \theta_1 x^{(i)} - y^{(i)}\big)^2$:
+  - Bring down 2, keep the inside
+  - Multiply by the derivative of the inside w.r.t. $\theta_0$ (which is 1)
+- The outer 2 cancels the $\tfrac{1}{2}$ in front
+
+$$
+\frac{\partial J}{\partial \theta_0}
+= \frac{1}{m} \sum_{i=1}^{m} \big( \theta_0 + \theta_1 x^{(i)} - y^{(i)} \big)
+= \frac{1}{m} \sum_{i=1}^{m} \big( h_\theta(x^{(i)}) - y^{(i)} \big)
+$$
+
+#### Step 3: Derivative with respect to $\theta_1$
+- Chain rule on $\big(\theta_0 + \theta_1 x^{(i)} - y^{(i)}\big)^2$:
+  - Bring down 2, keep the inside
+  - Multiply by the derivative of the inside w.r.t. $\theta_1$ (which is $x^{(i)}$)
+- The outer 2 cancels the $\tfrac{1}{2}$ in front
+
+$$
+\frac{\partial J}{\partial \theta_1}
+= \frac{1}{m} \sum_{i=1}^{m} \big( \theta_0 + \theta_1 x^{(i)} - y^{(i)} \big)\, x^{(i)}
+= \frac{1}{m} \sum_{i=1}^{m} \big( h_\theta(x^{(i)}) - y^{(i)} \big)\, x^{(i)}
+$$
+
+#### Summary table
+
+| **Parameter** | **Derivative** |
+| --- | --- |
+| $\theta_0$ | $\dfrac{1}{m} \sum_{i=1}^{m} \big( h_\theta(x^{(i)}) - y^{(i)} \big)$ |
+| $\theta_1$ | $\dfrac{1}{m} \sum_{i=1}^{m} \big( h_\theta(x^{(i)}) - y^{(i)} \big)\, x^{(i)}$ |
+
+<br/>
+
+For j = 0:
+
+$$
+\frac{\partial J}{\partial \theta_0}
+= \frac{1}{m}\sum_{i=1}^m \big(h_\theta(x^{(i)}) - y^{(i)}\big)
+$$
+
+<br/>
+
+For j = 1:
+
+$$
+\frac{\partial J}{\partial \theta_1}
+= \frac{1}{m}\sum_{i=1}^m \big(h_\theta(x^{(i)}) - y^{(i)}\big)\, x^{(i)}
+$$
+
+Where $h_\theta(x^{(i)}) = \theta_0 + \theta_1 \, x^{(i)}$.
+
+Intuition:
+- The term $(h_\theta(x^{(i)}) - y^{(i)})$ is the **prediction error**.
+- Multiplying by $x^{(i)}$ for $\theta_1$ **weights the error** by how much a change in slope affects the prediction at that $x$.
+
+### Gradient Descent Algorithm (simultaneous updates)
+Repeat until convergence:
+$$
+\begin{aligned}
+\theta_0 &:= \theta_0 - \alpha\; \underbrace{\frac{1}{m}\sum_{i=1}^m \big(h_\theta(x^{(i)}) - y^{(i)}\big)}_{\displaystyle \frac{\partial J}{\partial \theta_0}} \\
+\theta_1 &:= \theta_1 - \alpha\; \underbrace{\frac{1}{m}\sum_{i=1}^m \big(h_\theta(x^{(i)}) - y^{(i)}\big)\, x^{(i)}}_{\displaystyle \frac{\partial J}{\partial \theta_1}}
+\end{aligned}
+$$
+
+Use simultaneous updates: compute the right‑hand sides using the old `θ` values, then assign both `θ₀` and `θ₁` at once.
+
+### Why Gradient Descent Works for Linear Regression
+- The cost function for linear regression is always a bowl-shaped curve ("convex").
+![Liner Regression: Bowl-Shaped](images/lecture7/bowl_shaped.png)
+- There is only one lowest point (global optimum), so gradient descent always finds the best line.
+- No risk of getting stuck in a "bad" local minimum!
+- For linear regression, `J(θ₀, θ₁)` is a convex (bowl‑shaped) surface → it has a single global minimum and no other local minima.
+- Therefore gradient descent converges to the global optimum (with a reasonable learning rate).
+
+> Note (context from earlier intuition): One of the issues we saw with gradient descent is that it can be susceptible to local optima. When viewing a general surface, depending on where you initialize, you can end up at different local optima — you might wind up here or there. For linear regression's squared‑error cost, however, the surface is a convex bowl, so there are no alternate local optima to get stuck in.
+>
+> <div style="display: flex; gap: 10px;">
+>   <img src="images/lecture5/gd_surface_local_minima1.png" alt="Local minima example 1" width="49%"/>
+>   <img src="images/lecture5/gd_surface_local_minima2.png" alt="Local minima example 2" width="49%"/>
+> </div>
+
+
+### Algorithm in action
+
+Beginner‑friendly walkthrough:
+- Left: the line $h_\theta(x)$ shows your current predictions for price vs size. As we update $\theta_0,\theta_1$, this line tilts and shifts.
+- Right: the contour plot is the "map" of the cost $J(\theta_0,\theta_1)$. Each red "x" marks successive positions of $(\theta_0,\theta_1)$ during gradient descent.
+- What happens each step:
+  1) Compute the slopes (derivatives)
+  2) Take a step downhill (reduce $J$)
+  3) The line on the left becomes a better fit to the data
+- Keep stepping until the red "x" reaches the center (minimum) — then the left plot shows a line that best fits the data.
+
+<div style="display:flex; gap: 10px; align-items:center;">
+  <img src="images/lecture7/algorithm_in_action_left.png" alt="hθ(x) changing as parameters update" width="49%"/>
+  <img src="images/lecture7/algorithm_in_action_right.png" alt="Contour with successive parameter positions" width="49%"/>
+</div>
+
+#### Step-by-step from worst to best
+- Step 1 (**poor**): we start far from the right answer. The blue line misses most points, so the cost is very high.
+  
+  <img src="images/lecture7/algorithm_step_00.png" alt="Step 00" width="70%"/>
+
+- Step 2 (**okay**): after one step, the line turns toward the data and the cost drops. The **red ×** shows the new $(\theta_0,\theta_1)$.
+  
+  <img src="images/lecture7/algorithm_step_01_latest.png" alt="Step 01" width="70%"/>
+
+- Step 3 (**good**): the line now follows the upward trend. Errors are smaller, but many points are still off.
+  
+  <img src="images/lecture7/algorithm_step_02.png" alt="Step 02" width="70%"/>
+
+- Step 4 (**better**): errors are smaller across all sizes; we are clearly moving downhill on the contour.
+  
+  <img src="images/lecture7/algorithm_step_03.png" alt="Step 03" width="70%"/>
+
+- Step 5 (**strong**): the parameters are stabilizing and the line captures the data trend well.
+  
+  <img src="images/lecture7/algorithm_step_04.png" alt="Step 04" width="70%"/>
+
+- Step 6 (**very strong**): only tiny changes now. We are close to the center ring (low cost).
+  
+  <img src="images/lecture7/algorithm_step_05.png" alt="Step 05" width="70%"/>
+
+- Step 7 (**near‑best**): almost at the minimum. The red × is near the center and the line fits the data well.
+  
+  <img src="images/lecture7/algorithm_step_06.png" alt="Step 06" width="70%"/>
+
+- Step 8 (**best so far**): the **red ×** is very close to the center (lowest cost). This is our **near‑perfect** fit for this noisy dataset.
+  
+  <img src="images/lecture7/algorithm_step_07.png" alt="Step 07" width="70%"/>
+
+### Batch gradient descent
+- Each update sums over all `m` training examples — we're using the entire "batch" every step.
+- Pros: stable updates, guaranteed to go downhill on this convex `J` with small enough `α`.
+- Cons: can be slow on very large datasets. Later we'll see stochastic/mini‑batch variants.
+
+### Normal equation (alternative)
+- There is a closed‑form solution (normal equation) that solves for `θ` without iterations.
+- Useful for small/medium `m`, but gradient descent scales better to very large datasets and generalizes to many models.
