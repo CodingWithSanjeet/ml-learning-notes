@@ -32,6 +32,7 @@ Welcome! In this module we quickly review the linear‑algebra building blocks y
   - [Worked example 2 (3×4)·(4×1)](#worked-example-2-34·41)
   - [Quick analogy](#quick-analogy)
   - [Predict many outputs at once (design matrix)](#predict-many-outputs-at-once-design-matrix)
+  - [Application: Predicting House Prices](#application-predicting-house-prices)
   - [Key takeaways (Lecture 3)](#key-takeaways-lecture-3)
 
 - [Lecture 4: Matrix-Matrix Multiplication](#lecture-4-matrix-matrix-multiplication)
@@ -41,6 +42,8 @@ Welcome! In this module we quickly review the linear‑algebra building blocks y
   - [Worked example 1 (2×3)·(3×2)](#worked-example-1-23·32)
   - [Worked example 2 (2×2)·(2×2)](#worked-example-2-22·22)
   - [Apply many hypotheses at once (Ŷ = X Θ)](#apply-many-hypotheses-at-once-ŷ--x-θ)
+  - [Application to Linear Regression](#application-to-linear-regression)
+  - [Efficiency](#efficiency)
   - [Key takeaways (Lecture 4)](#key-takeaways-lecture-4)
 
 ---
@@ -497,6 +500,38 @@ Vectorized form:
 
 This vectorized form computes all `m` predictions in one matrix‑vector product, which is both simpler to write and typically faster in practice.
 
+### Application: Predicting House Prices
+
+Suppose we want to compute predictions for many houses at once using a linear model `h_θ(x) = θ₀ + θ₁ x`.
+
+Construct the design matrix with a bias column of ones:
+
+```
+X = ⎡ 1  x₁ ⎤
+    ⎢ 1  x₂ ⎥
+    ⎢ 1  x₃ ⎥   (m × 2)
+    ⎣ 1  x₄ ⎦
+```
+
+Parameters as a column vector:
+
+```
+θ = ⎡ θ₀ ⎤
+    ⎣ θ₁ ⎦   (2 × 1)
+```
+
+Predict all `m` prices in one multiplication:
+
+```
+ŷ = X θ   (m × 1)
+```
+
+Result: an `m × 1` vector with the predicted price for each house.
+
+Computational benefit
+- One line of code instead of loops (cleaner, less error‑prone)
+- Vectorized operations are optimized in libraries (faster)
+
 ### Key takeaways (Lecture 3)
 - `A` (`m × n`) times `x` (`n × 1`) yields `y` (`m × 1`). Inner dimensions must match.
 - Each output entry is a dot product of one row of `A` with `x`.
@@ -641,6 +676,31 @@ X = ⎡ 1  2104 ⎤
 ```
 
 This shows how a single `X Θ` computes many predictions efficiently (vectorization).
+
+### Application to Linear Regression
+
+Goal: get predictions for many houses using several linear hypotheses at once.
+
+- Construct the design matrix `X` with a bias column of 1s and a size column.
+- Build the parameter matrix `Θ` where each column holds one hypothesis’ parameters `(θ₀, θ₁)`.
+- Multiply to get all predictions at once:
+
+```
+Ŷ = X Θ   →  matrix of predictions (m × k)
+```
+
+- Columns of `Ŷ`: predictions from each hypothesis for all houses
+- Rows of `Ŷ`: predictions for one house across all hypotheses
+
+Example: 4 houses × 3 hypotheses = 12 predictions from one matrix multiply.
+
+### Efficiency
+
+Programming languages provide highly optimized libraries for matrix–matrix multiply (BLAS/LAPACK, NumPy, etc.). These exploit parallel hardware:
+- Multi‑core CPUs and SIMD vector instructions
+- GPUs and other accelerators
+
+Result: large batches of predictions (many houses × many hypotheses) run fast and with simple code.
 
 ### Key takeaways (Lecture 4)
 - Multiply matrices only when inner dimensions match: `(m × n)·(n × p) = (m × p)`.
