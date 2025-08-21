@@ -46,6 +46,14 @@ Welcome! In this module we quickly review the linear‑algebra building blocks y
   - [Efficiency](#efficiency)
   - [Key takeaways (Lecture 4)](#key-takeaways-lecture-4)
 
+- [Lecture 5: Matrix Multiplication Properties](#lecture-5-matrix-multiplication-properties)
+  - [Matrix Multiplication Is Not Commutative: AB ≠ BA](#matrix-multiplication-is-not-commutative-ab--ba)
+  - [Matrix Multiplication Is Associative: A(BC) = (AB)C](#matrix-multiplication-is-associative-abc--abc)
+  - [Identity matrix I](#identity-matrix-i)
+  - [Dimension reminders](#dimension-reminders)
+  - [Quick examples](#quick-examples)
+  - [Key takeaways (Lecture 5)](#key-takeaways-lecture-5)
+
 ---
 
 ## Lecture 1: Matrices and Vectors
@@ -641,6 +649,22 @@ AB = ⎡ 1·0 + 3·3    1·1 + 3·2 ⎤
    = ⎡ 9   7 ⎤
      ⎣ 15  12⎦
 ```
+### Application to Linear Regression
+
+Goal: get predictions for many houses using several linear hypotheses at once.
+
+- Construct the design matrix `X` with a bias column of 1s and a size column.
+- Build the parameter matrix `Θ` where each column holds one hypothesis’ parameters `(θ₀, θ₁)`.
+- Multiply to get all predictions at once:
+
+```
+Ŷ = X Θ   →  matrix of predictions (m × k)
+```
+
+- Columns of `Ŷ`: predictions from each hypothesis for all houses (predictions from one hypothesis.)
+- Rows of `Ŷ`: predictions for one house across all hypotheses (predictions for one house.)
+
+Example: 4 houses × 3 hypotheses = 12 predictions from one matrix multiply.
 
 ### Apply many hypotheses at once (Ŷ = X Θ)
 Stack `m` inputs in `X` (`m × d`) with a leading column of ones; stack `k` hypotheses as columns of `Θ` (`d × k`). Then one matrix multiply gives all `m × k` predictions:
@@ -677,22 +701,7 @@ X = ⎡ 1  2104 ⎤
 
 This shows how a single `X Θ` computes many predictions efficiently (vectorization).
 
-### Application to Linear Regression
 
-Goal: get predictions for many houses using several linear hypotheses at once.
-
-- Construct the design matrix `X` with a bias column of 1s and a size column.
-- Build the parameter matrix `Θ` where each column holds one hypothesis’ parameters `(θ₀, θ₁)`.
-- Multiply to get all predictions at once:
-
-```
-Ŷ = X Θ   →  matrix of predictions (m × k)
-```
-
-- Columns of `Ŷ`: predictions from each hypothesis for all houses
-- Rows of `Ŷ`: predictions for one house across all hypotheses
-
-Example: 4 houses × 3 hypotheses = 12 predictions from one matrix multiply.
 
 ### Efficiency
 
@@ -707,4 +716,103 @@ Result: large batches of predictions (many houses × many hypotheses) run fast a
 - Column view: each column of `C` is `A` times the corresponding column of `B`.
 - Entry view: `C_{ij} = Σ_k A_{ik} B_{kj}`.
 - Vectorization: compute many predictions at once with `Ŷ = X Θ`.
+
+
+---
+
+## Lecture 5: Matrix Multiplication Properties
+
+Matrix multiplication is powerful, but it doesn’t behave like ordinary number multiplication in all ways. Here are the key properties you should know.
+
+### Matrix Multiplication Is Not Commutative: AB ≠ BA
+- For real numbers, 3·5 = 5·3. For matrices, the order usually matters.
+- In general, `A B ≠ B A`.
+- Shapes can even prevent reversing: if `A` is `m×n` and `B` is `n×p`, then `A B` is `m×p`; but `B A` would be `n×n` only if `p = m`.
+
+Dimension example (both defined but different shapes):
+
+```
+A (2×3),  B (3×2)
+AB → (2×2)   but   BA → (3×3)
+```
+
+Since `AB` and `BA` do not even have the same dimensions, they cannot be equal.
+
+Example (2×2):
+
+```
+A = ⎡1 1⎤,  B = ⎡0 0⎤
+    ⎣0 0⎦       ⎣2 0⎦
+
+AB = ⎡1·0 + 1·2   1·0 + 1·0⎤ = ⎡2  0⎤
+     ⎣0·0 + 0·2   0·0 + 0·0⎦   ⎣0  0⎦
+
+BA = ⎡0·1 + 0·0   0·1 + 0·0⎤ = ⎡0  0⎤
+     ⎣2·1 + 0·0   2·1 + 0·0⎦   ⎣2  2⎦
+```
+
+Clearly, `AB ≠ BA`.
+
+### Matrix Multiplication Is Associative: A(BC) = (AB)C
+- Like real numbers, matrix multiplication is associative.
+- You can group products without changing the result, provided the shapes allow both sides.
+
+Number analogy:
+```
+3 × (5 × 2) = (3 × 5) × 2 = 30
+```
+
+Matrix example (shapes chosen so both groupings are valid):
+
+```
+A (2×3),  B (3×4),  C (4×2)
+
+(AB) has shape (2×4), so (AB)C is (2×2)
+(BC) has shape (3×2), so A(BC) is (2×2)
+
+Compute either order and you get the same (2×2) result.
+```
+
+Operational view:
+```
+Let D = (B C), then A(BC) = A D
+Let E = (A B), then (AB)C = E C
+```
+
+Both yield the same matrix.
+
+### Identity matrix I
+- Numbers: 1 is the multiplicative identity (`1 × z = z × 1 = z`).
+- Matrices: the `n×n` identity `Iₙ` has 1s on the diagonal and 0s elsewhere, and acts like 1. For any `A (m×n)`:
+
+```
+Iₘ A = A    and    A Iₙ = A
+```
+
+Shapes must match the sides you multiply on (left uses `Iₘ`, right uses `Iₙ`).
+
+Examples:
+
+```
+I₂ = ⎡1 0⎤,  I₃ = ⎡1 0 0⎤
+     ⎣0 1⎦        ⎣0 1 0⎦
+                 ⎣0 0 1⎦
+```
+
+Note: While `AB ≠ BA` in general, `A I = I A = A` does hold.
+
+### Dimension reminders
+- `A (m×n)` times `B (n×p)` is defined and yields `m×p`.
+- Reversing order changes both validity and shape; don’t assume commutativity.
+- When identities appear, ensure the `I` on each side has the correct size (`Iₘ` or `Iₙ`).
+
+### Quick examples
+- Non‑commutative shapes: if `A (2×3)` and `B (3×4)`, then `AB (2×4)` is valid; `BA` is not defined.
+- Associativity in practice: compute `X(Θ W)` or `(X Θ)W` depending on which is cheaper; both are equal when defined.
+
+### Key takeaways (Lecture 5)
+- Matrix multiplication is generally not commutative (`AB ≠ BA`).
+- It is associative: `A(BC) = (AB)C` when shapes allow.
+- The identity `I` satisfies `I A = A I = A` with appropriate sizes.
+- Always check dimensions before multiplying; order matters.
 
