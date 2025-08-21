@@ -355,13 +355,14 @@ $$
 So `y` stacks these `m` dot products, one per row of `A`.
 
 Handy template (3×2)·(2×1):
+
 $$
 \begin{bmatrix}
 a & b \\
 c & d \\
 e & f
 \end{bmatrix}
-\ X \
+\ * \
 \begin{bmatrix}
 w \\
 y
@@ -518,11 +519,13 @@ Column view (most intuitive for beginners):
 - The i‑th column of `C` is: `C_{:,i} = A × B_{:,i}`, i.e., `A` multiplied with the i‑th column of `B`.
 
 Entry‑wise (dot‑product) view:
+
 $$
 C_{ij} \,=\, \sum_{k=1}^{n} A_{ik} \, B_{kj}
 $$
 
 Handy template (3×2)·(2×2):
+
 $$
 \begin{bmatrix}
 a & b \\
