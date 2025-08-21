@@ -34,6 +34,15 @@ Welcome! In this module we quickly review the linear‑algebra building blocks y
   - [Predict many outputs at once (design matrix)](#predict-many-outputs-at-once-design-matrix)
   - [Key takeaways (Lecture 3)](#key-takeaways-lecture-3)
 
+- [Lecture 4: Matrix-Matrix Multiplication](#lecture-4-matrix-matrix-multiplication)
+  - [What is matrix-matrix multiplication?](#what-is-matrix-matrix-multiplication)
+  - [Dimension rule and output shape](#dimension-rule-and-output-shape)
+  - [How to compute C = A B](#how-to-compute-c--a-b)
+  - [Worked example 1 (2×3)·(3×2)](#worked-example-1-23·32)
+  - [Worked example 2 (2×2)·(2×2)](#worked-example-2-22·22)
+  - [Apply many hypotheses at once (Ŷ = X Θ)](#apply-many-hypotheses-at-once-ŷ--x-θ)
+  - [Key takeaways (Lecture 4)](#key-takeaways-lecture-4)
+
 ---
 
 ## Lecture 1: Matrices and Vectors
@@ -345,6 +354,26 @@ $$
 
 So `y` stacks these `m` dot products, one per row of `A`.
 
+Handy template (3×2)·(2×1):
+$$
+\begin{bmatrix}
+a & b \\
+c & d \\
+e & f
+\end{bmatrix}
+\ X \
+\begin{bmatrix}
+w \\
+y
+\end{bmatrix}
+= \
+\begin{bmatrix}
+aw + by \\
+cw + dy \\
+ew + fy
+\end{bmatrix}
+$$
+
 ### Beginner-friendly example (step-by-step)
 Imagine you track two scores for each student: math and science. You want one “overall score” that weighs math double and science single. For three students, the math/science scores are the rows of `A`, and your weights are the vector `x`:
 
@@ -471,3 +500,148 @@ This vectorized form computes all `m` predictions in one matrix‑vector product
 - `A` (`m × n`) times `x` (`n × 1`) yields `y` (`m × 1`). Inner dimensions must match.
 - Each output entry is a dot product of one row of `A` with `x`.
 - Stacking inputs into a design matrix lets you compute many predictions at once: `ŷ = X θ`.
+
+
+---
+
+## Lecture 4: Matrix-Matrix Multiplication
+
+### What is matrix-matrix multiplication?
+Given `A` and `B`, their product `C = A B` is a new matrix built column‑by‑column: each column of `C` is `A` times the corresponding column of `B` (a standard matrix‑vector multiply).
+
+### Dimension rule and output shape
+- If `A` is `m × n` and `B` is `n × p`, then `C = A B` is `m × p`.
+- Inner dimensions must match (`n` with `n`). The outer dimensions (`m` and `p`) become the shape of the result.
+
+### How to compute C = A B
+Column view (most intuitive for beginners):
+- The i‑th column of `C` is: `C_{:,i} = A × B_{:,i}`, i.e., `A` multiplied with the i‑th column of `B`.
+
+Entry‑wise (dot‑product) view:
+$$
+C_{ij} \,=\, \sum_{k=1}^{n} A_{ik} \, B_{kj}
+$$
+
+Handy template (3×2)·(2×2):
+$$
+\begin{bmatrix}
+a & b \\
+c & d \\
+e & f
+\end{bmatrix}
+\ X \
+\begin{bmatrix}
+w & x \\
+y & z
+\end{bmatrix}
+= \
+\begin{bmatrix}
+aw + by & ax + bz \\
+cw + dy & cx + dz \\
+ew + fy & ex + fz
+\end{bmatrix}
+$$
+
+### Worked example 1 (2×3)·(3×2)
+Let
+
+```
+A = ⎡ 1  3  2 ⎤
+    ⎣ 4  0  1 ⎦   (2 × 3),
+
+B = ⎡ 1  2 ⎤
+    ⎢ 3  0 ⎥      (3 × 2)
+    ⎣ 2  5 ⎦
+```
+
+Compute columns of `C = A B`:
+
+
+
+Step‑by‑step (column view):
+
+```
+Take A and the first column of B (b₁):
+
+A b₁ = ⎡ 1  3  2 ⎤  ⎡ 1 ⎤   = ⎡ 1·1 + 3·3 + 2·2 ⎤   = ⎡ 14 ⎤
+       ⎣ 4  0  1 ⎦  ⎥ 3 ⎥     ⎣ 4·1 + 0·3 + 1·2 ⎦     ⎣  6 ⎦
+                    ⎣ 2 ⎦
+Take A and the second column of B (b₂):
+
+A b₂ = ⎡ 1  3  2 ⎤ ⎡ 2 ⎤   = ⎡ 1·2 + 3·0 + 2·5 ⎤   = ⎡ 12 ⎤
+       ⎣ 4  0  1 ⎦ ⎥ 0 ⎥     ⎣ 4·2 + 0·0 + 1·5 ⎦     ⎣ 13 ⎦
+                   ⎣ 5 ⎦
+
+Assemble C by placing the results as columns:
+
+C = [ A b₁  A b₂ ] = ⎡ 14  12 ⎤
+                     ⎣  6  13 ⎦
+```
+
+
+So
+
+```
+C = ⎡ 14  12 ⎤
+    ⎣  6  13 ⎦   (2 × 2)
+```
+
+### Worked example 2 (2×2)·(2×2)
+Let
+
+```
+A = ⎡ 1  3 ⎤
+    ⎣ 2  5 ⎦,   B = ⎡ 0  1 ⎤
+                   ⎣ 3  2 ⎦
+```
+
+Then
+
+```
+AB = ⎡ 1·0 + 3·3    1·1 + 3·2 ⎤
+     ⎣ 2·0 + 5·3    2·1 + 5·2 ⎦
+   = ⎡ 9   7 ⎤
+     ⎣ 15  12⎦
+```
+
+### Apply many hypotheses at once (Ŷ = X Θ)
+Stack `m` inputs in `X` (`m × d`) with a leading column of ones; stack `k` hypotheses as columns of `Θ` (`d × k`). Then one matrix multiply gives all `m × k` predictions:
+
+```
+Ŷ = X Θ   (m × k)
+```
+
+Example (4 houses, 3 hypotheses):
+
+Hypotheses
+- h₁(x) = −40 + 0.25·x
+- h₂(x) = 200 + 0.10·x
+- h₃(x) = −150 + 0.40·x
+
+House Sizes
+- 2104
+- 1416
+- 1534
+- 853
+
+```
+X = ⎡ 1  2104 ⎤
+    ⎢ 1  1416 ⎥
+    ⎢ 1  1534 ⎥        Θ = ⎡  −40   200  −150 ⎤
+    ⎣ 1   852 ⎦            ⎣ 0.25  0.10  0.40 ⎦
+
+Ŷ = X Θ =
+⎡ 486   410   692 ⎤
+⎢ 314   342   416 ⎥
+⎢ 344   353   464 ⎥
+⎣ 173   285   191 ⎦   (rounded to nearest integer)
+```
+
+This shows how a single `X Θ` computes many predictions efficiently (vectorization).
+
+### Key takeaways (Lecture 4)
+- Multiply matrices only when inner dimensions match: `(m × n)·(n × p) = (m × p)`.
+- Column view: each column of `C` is `A` times the corresponding column of `B`.
+- Entry view: `C_{ij} = Σ_k A_{ik} B_{kj}`.
+- Vectorization: compute many predictions at once with `Ŷ = X Θ`.
+
