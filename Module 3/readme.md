@@ -23,6 +23,17 @@ Welcome! In this module we quickly review the linear‑algebra building blocks y
   - [4. Dimension rules to remember](#4-dimension-rules-to-remember)
   - [5. Key takeaways](#5-key-takeaways)
 
+- [Lecture 3: Matrix-Vector Multiplication](#lecture-3-matrix-vector-multiplication)
+  - [What is matrix-vector multiplication?](#what-is-matrix-vector-multiplication)
+  - [Dimension rule (when A x is defined)](#dimension-rule-when-a-x-is-defined)
+  - [How to compute y = A x](#how-to-compute-y--a-x)
+  - [Beginner-friendly example (step-by-step)](#beginner-friendly-example-step-by-step)
+  - [Worked example 1 (3×2)·(2×1)](#worked-example-1-32·21)
+  - [Worked example 2 (3×4)·(4×1)](#worked-example-2-34·41)
+  - [Quick analogy](#quick-analogy)
+  - [Predict many outputs at once (design matrix)](#predict-many-outputs-at-once-design-matrix)
+  - [Key takeaways (Lecture 3)](#key-takeaways-lecture-3)
+
 ---
 
 ## Lecture 1: Matrices and Vectors
@@ -310,3 +321,153 @@ Result: a 3 × 1 matrix (3‑D vector)
 - Scalar multiplication/division: element‑wise; multiply every entry.
 - Vectors follow the same rules since they are `n × 1` matrices.
 - Always keep an eye on the dimensions before you operate.
+
+
+---
+
+## Lecture 3: Matrix-Vector Multiplication
+
+### What is matrix-vector multiplication?
+Given a matrix `A` and a vector `x`, their product `A x` is a new vector `y` formed by taking dot products of the rows of `A` with `x`.
+
+Intuition: each row of `A` mixes the entries of `x` to produce one output number.
+
+### Dimension rule (when A x is defined)
+- If `A` is `m × n` and `x` is `n × 1` (an `n`‑dimensional column vector), then `y = A x` is `m × 1` (an `m`‑dimensional vector).
+- The inner dimensions must match: the number of columns of `A` equals the number of rows of `x`.
+
+### How to compute y = A x
+To compute the `i`‑th entry of `y`, take the dot product of the `i`‑th row of `A` with `x`:
+
+$$
+y_i \;=\; A_{i,:} \cdot x \;=\; \sum_{j=1}^{n} A_{ij} \, x_j
+$$
+
+So `y` stacks these `m` dot products, one per row of `A`.
+
+### Beginner-friendly example (step-by-step)
+Imagine you track two scores for each student: math and science. You want one “overall score” that weighs math double and science single. For three students, the math/science scores are the rows of `A`, and your weights are the vector `x`:
+
+```
+A = ⎡ 70  80 ⎤   (Student 1: math 70, science 80)
+    ⎢ 90  60 ⎥   (Student 2: math 90, science 60)
+    ⎣ 50  95 ⎦   (Student 3: math 50, science 95)
+
+x = ⎡ 2 ⎤       (Weight math by 2,
+    ⎣ 1 ⎦        science by 1)
+```
+
+Overall scores `y = A x` (row-by-row):
+
+```
+y₁ = 70·2 + 80·1 = 140 + 80 = 220
+y₂ = 90·2 + 60·1 = 180 + 60 = 240
+y₃ = 50·2 + 95·1 = 100 + 95 = 195
+
+y = ⎡ 220 ⎤
+    ⎢ 240 ⎥
+    ⎣ 195 ⎦
+```
+
+Each row (one student) dot‑products with the weights to get one overall score. That’s matrix‑vector multiplication.
+
+### Worked example 1 (3×2)·(2×1)
+Suppose
+
+```
+A = ⎡ 1  3 ⎤
+    ⎢ 4  0 ⎥   (3 × 2),   x = ⎡ 1 ⎤ (2 × 1)
+    ⎣ 2  1 ⎦                  ⎣ 5 ⎦
+```
+
+Compute `y = A x`:
+
+```
+y₁ = 1·1 + 3·5 = 1 + 15 = 16
+y₂ = 4·1 + 0·5 = 4 + 0  = 4
+y₃ = 2·1 + 1·5 = 2 + 5  = 7
+```
+
+So
+
+```
+y = ⎡ 16 ⎤
+    ⎢  4 ⎥
+    ⎣  7 ⎦   (3 × 1)
+```
+
+### Worked example 2 (3×4)·(4×1)
+Let
+
+```
+A = ⎡  1   2   1   5 ⎤
+    ⎢  0   3   0   4 ⎥   (3 × 4),   x = ⎡ 1 ⎤ (4 × 1)
+    ⎣ −1   2   0   0 ⎦                  ⎢ 3 ⎥
+                                        ⎢ 2 ⎥
+                                        ⎣ 1 ⎦
+```
+
+Compute `y = A x`:
+
+```
+y₁ = 1·1 + 2·3 + 1·2 + 5·1 = 1 + 6 + 2 + 5  = 14
+y₂ = 0·1 + 3·3 + 0·2 + 4·1 = 0 + 9 + 0 + 4  = 13
+y₃ = (−1)·1 + 2·3 + 0·2 + 0·1 = −1 + 6 + 0 + 0 = 5
+```
+
+So
+
+```
+y = ⎡ 14 ⎤
+    ⎢ 13 ⎥
+    ⎣  5 ⎦   (3 × 1)
+```
+
+### Predict many outputs at once (design matrix)
+Suppose you have features `x` (e.g., house size) and hypothesis `h_θ(x) = θ₀ + θ₁ x`. For many inputs `x¹, …, xᵐ`, stack them into a design matrix with a leading column of ones:
+
+```
+X = ⎡ 1   x¹ ⎤
+    ⎢ 1   x² ⎥
+    ⎢ ⋮   ⋮   ⎥   (m × 2),   θ = ⎡ θ₀ ⎤ (2 × 1)
+    ⎣ 1   xᵐ ⎦                  ⎣ θ₁ ⎦
+```
+
+Then all predictions at once are
+
+```
+ŷ = X θ  (m × 1)
+```
+
+Example (4 houses):
+
+```
+X = ⎡ 1  2104 ⎤
+    ⎢ 1  1416 ⎥
+    ⎢ 1  1534 ⎥
+    ⎣ 1   852 ⎦    ,    θ =  ⎡ −40 ⎤
+                            ⎣ 0.25 ⎦
+
+Here’s `h_θ(x) = −40 + 0.25·x` applied to your house sizes:
+
+ x = 2104 ⇒ h_θ(x) = −40 + 0.25·2104 = 486
+ x = 1416 ⇒ h_θ(x) = −40 + 0.25·1416 = 314
+ x = 1534 ⇒ h_θ(x) = −40 + 0.25·1534 = 343.5
+ x =  852 ⇒ h_θ(x) = −40 + 0.25· 852 = 173
+
+Vectorized form:
+
+
+⎡ 1  2104 ⎤   ⎡ −40 ⎤    ⎡ 486   ⎤
+⎢ 1  1416 ⎥ · ⎣ 0.25⎦ =  ⎢ 314   ⎥
+⎢ 1  1534 ⎥             ⎢ 343.5 ⎥
+⎣ 1   852 ⎦             ⎣ 173   ⎦
+
+```
+
+This vectorized form computes all `m` predictions in one matrix‑vector product, which is both simpler to write and typically faster in practice.
+
+### Key takeaways (Lecture 3)
+- `A` (`m × n`) times `x` (`n × 1`) yields `y` (`m × 1`). Inner dimensions must match.
+- Each output entry is a dot product of one row of `A` with `x`.
+- Stacking inputs into a design matrix lets you compute many predictions at once: `ŷ = X θ`.
