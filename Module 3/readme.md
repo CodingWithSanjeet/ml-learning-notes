@@ -54,6 +54,14 @@ Welcome! In this module we quickly review the linear‑algebra building blocks y
   - [Quick examples](#quick-examples)
   - [Key takeaways (Lecture 5)](#key-takeaways-lecture-5)
 
+- [Lecture 6: Matrix Inverse and Transpose](#lecture-6-matrix-inverse-and-transpose)
+  - [Matrix inverse: idea and identity](#matrix-inverse-idea-and-identity)
+  - [When does an inverse exist?](#when-does-an-inverse-exist)
+  - [Quick 2×2 inverse example](#quick-22-inverse-example)
+  - [Transpose: definition and shape](#transpose-definition-and-shape)
+  - [Transpose example](#transpose-example)
+  - [Key takeaways (Lecture 6)](#key-takeaways-lecture-6)
+
 ---
 
 ## Lecture 1: Matrices and Vectors
@@ -815,4 +823,74 @@ Note: While `AB ≠ BA` in general, `A I = I A = A` does hold.
 - It is associative: `A(BC) = (AB)C` when shapes allow.
 - The identity `I` satisfies `I A = A I = A` with appropriate sizes.
 - Always check dimensions before multiplying; order matters.
+
+---
+
+## Lecture 6: Matrix Inverse and Transpose
+
+Beginner-friendly recap of two special operations: inverse (undoes a square matrix) and transpose (flips rows/columns).
+
+### Matrix inverse: idea and identity
+- Number analogy: 3 has inverse 1/3 because `3 × (1/3) = 1`.
+- Matrix analogy: a square matrix `A (n×n)` may have an inverse `A⁻¹` such that
+
+```
+A A⁻¹ = A⁻¹ A = Iₙ
+```
+
+`Iₙ` is the `n×n` identity matrix (1s on the diagonal, 0s elsewhere).
+
+### When does an inverse exist?
+- Only square matrices can have inverses. Non‑square matrices do not have an inverse.
+- Even among square matrices, some are not invertible (e.g., the all‑zeros matrix). These are called **singular (or degenerate)**.
+- In practice, use software to compute inverses:
+  - Octave/NumPy: `pinv(A)` (pseudo‑inverse; robust for singular/near‑singular cases)
+  - MATLAB: `inv(A)` (true inverse when it exists)
+
+### Quick 2×2 inverse example
+Let
+
+```
+A = ⎡  3   4 ⎤
+    ⎣  2  16 ⎦
+```
+
+One valid inverse is approximately
+
+```
+A⁻¹ ≈ ⎡  0.40  −0.10  ⎤
+      ⎣ −0.05   0.0625⎦
+```
+
+Check (up to rounding):
+
+```
+A A⁻¹ ≈ I₂   and   A⁻¹ A ≈ I₂
+```
+
+### Transpose: definition and shape
+- The transpose of `A`, written `Aᵀ`, flips rows and 
+columns.
+- It, flips the matrix over its diagonal (like reflecting along a 45° axis).
+- How to transpose:
+  - Row 1 of `A` becomes column 1 of `Aᵀ`.
+  - Row 2 of `A` becomes column 2 of `Aᵀ`, and so on.
+- Dimensions: if `A` is `m×n`, then `Aᵀ` is `n×m`.
+- Elementwise: $A_{ij} = A^{T}_{ji}$.
+
+### Transpose example
+
+```
+A = ⎡ 1  2  0 ⎤
+    ⎣ 3  5  9 ⎦    (2 × 3)
+
+Aᵀ = ⎡ 1  3 ⎤
+      ⎢ 2  5 ⎥    (3 × 2)
+      ⎣ 0  9 ⎦
+```
+
+### Key takeaways (Lecture 6)
+- Inverse exists only for square, non‑singular matrices; `A A⁻¹ = A⁻¹ A = I`.
+- Transpose flips shape and swaps indices: $A_{ij} = A^{T}_{ji}$.
+- Use libraries for inverses; avoid hand computation except for tiny matrices.
 
