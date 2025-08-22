@@ -13,7 +13,17 @@ Welcome to this repository of beginner‑friendly machine learning notes, figure
   - 3D bowl, contour plots, and “algorithm in action” visuals
 
 - [Module 3 – Linear Algebra Review](Module%203/readme.md)
-  - Matrices and vectors, sizes, indexing, and set notation $\mathbb{R}^{m\times n}$ and $\mathbb{R}^n$
+  - Matrices/vectors, sizes, indexing, set notation $\mathbb{R}^{m\times n}$ and $\mathbb{R}^n$
+  - Addition/subtraction; scalar multiplication/division
+  - Matrix–vector multiplication; design‑matrix predictions: $\hat y = X\theta$
+  - Matrix–matrix multiplication; multi‑hypothesis predictions: $\hat Y = X\Theta$
+  - Properties: non‑commutativity ($AB \ne BA$), associativity, identity matrix
+  - Inverse and transpose: when $A^{-1}$ exists; element rule $A^T_{ji} = A_{ij}$
+
+- [Module 4 – Linear Regression with Multiple Variables](Module%204/readme.md)
+  - Multiple features (size, bedrooms, floors, age)
+  - Bias feature: set $x_0 = 1$; write hypothesis as $h_\theta(x) = \theta^\top x$
+  - Vector shapes: $\theta \in \mathbb{R}^{n+1}$, $x \in \mathbb{R}^{n+1}$, $\theta^\top x \in \mathbb{R}$
 
 ## 🔎 How to navigate
 
