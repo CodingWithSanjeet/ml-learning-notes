@@ -21,6 +21,14 @@ Welcome! In this module we upgrade linear regression to use many features (a.k.a
   - [Why this matches the 1-feature case](#why-this-matches-the-1-feature-case)
   - [Pseudocode](#pseudocode)
 
+- [Lecture 3: Gradient Descent in Practice I – Feature Scaling](#lecture-3-gradient-descent-in-practice-i--feature-scaling)
+  - [Why scale features?](#why-scale-features)
+  - [Target ranges and rules of thumb](#target-ranges-and-rules-of-thumb)
+  - [Mean normalization + scaling formula](#mean-normalization--scaling-formula)
+  - [Mini example (before/after)](#mini-example-beforeafter)
+  - [Practical recipe](#practical-recipe)
+  - [Key takeaways (Lecture 3)](#key-takeaways-lecture-3)
+
 ---
 
 ## Lecture 1: Multiple Features
@@ -350,4 +358,118 @@ e^{(0)} &= h^{(0)} - y = \begin{bmatrix}-200\\-260\end{bmatrix} \\
 \theta^{(1)} &= \theta^{(0)} - \alpha\, \nabla J(\theta^{(0)}) = \begin{bmatrix}0\\0\\0\end{bmatrix} - 10^{-3}\begin{bmatrix}-230\\-590\\-360\end{bmatrix} = \begin{bmatrix}0.230\\0.590\\0.360\end{bmatrix}
 \end{aligned}
 $$
+
+
+---
+
+## Lecture 3: Gradient Descent in Practice I – Feature Scaling
+
+### Why scale features?
+- Gradient descent works better and converges faster when all your input features (variables) are on similar scales (take similar ranges of values).
+- If one feature varies from 0–2000 and another from 1–5, the cost function becomes stretched and weirdly shaped (long, skinny ellipses), making learning slow and inefficient.
+- Scaling features to similar ranges makes contours more circular → faster, more direct convergence.
+
+Visual comparison (generated from our script):
+
+![Feature scaling: unscaled vs scaled](images/feature_scaling_comparison.png)
+
+- Left: Unscaled features → tall, thin ellipses; red path shows zig‑zagging GD.
+- Right: Scaled features → circular contours; red path goes straight to the minimum.
+
+<div style="display: flex; gap: 8px;">
+  <img src="images/unscaled_contours.png" alt="Unscaled contours" style="width: 49%;">
+  <img src="images/scaled_contours.png" alt="Scaled contours" style="width: 49%;">
+</div>
+
+### What Happens If Features Aren’t Scaled?
+- The algorithm might zigzag slowly toward the solution, taking a long time to find the best parameters.
+- If features have very different ranges (e.g., size in [0, 2000] vs. bedrooms in [1, 5]), the cost contours become tall, skinny ellipses.
+- Gradient descent then zig‑zags slowly toward the minimum, taking many iterations.
+- Unscaled features can cause frustratingly slow or ineffective learning.
+
+### Feature scaling (divide by a constant)
+- Feature scaling involves dividing the input values by the  range (i.e. the maximum value minus the minimum value) of the 
+input variable, resulting in a new range of just 1
+- Divide each feature by its range (or an approximate maximum) so magnitudes are similar.
+- After scaling, the contours of the cost function become 
+circular or less skewed, and gradient descent finds the optimal 
+solution much faster.
+
+    Example:
+
+        Raw features
+
+        | House | Size (sq ft) | Bedrooms |
+        |-----:|-------------:|---------:|
+        | 1 | 1500 | 3 |
+        | 2 | 2000 | 4 |
+        | 3 | 1000 | 2 |
+        | 4 | 1800 | 3 |
+
+        Raw ranges
+        - Size: 1000 → 2000 (large scale)
+        - Bedrooms: 2 → 4 (small scale)
+
+        Apply simple scaling
+        - Size_scaled = Size / 2000
+        - Bedrooms_scaled = Bedrooms / 5
+
+        | House | Size_scaled | Bedrooms_scaled |
+        |-----:|------------:|----------------:|
+        | 1 | 0.75 | 0.60 |
+        | 2 | 1.00 | 0.80 |
+        | 3 | 0.50 | 0.40 |
+        | 4 | 0.90 | 0.60 |
+
+        Result
+        - Both features are now on roughly the same scale (≈ 0 to 1).
+        - Reduces skew in cost contours; gradient descent converges faster and more smoothly.
+
+### Target ranges and rules of thumb
+- Aim to bring each feature roughly into [−1, +1] (or at least similar magnitudes).
+- Don’t worry about being exact. “Close enough” is fine: if `x ∈ [0, 3]` or `x ∈ [−2, 0.5]`, you usually don’t need to rescale again.
+- Potentially problematic ranges:
+  - Too large: `[−100, 100]` can slow learning (stretched contours)
+  - Too small: `[−0.0001, 0.0001]` can also cause poor conditioning
+
+### Mean normalization + scaling (recommended)
+- Mean normalization adjusts each feature so its average becomes ≈ 0 (don’t apply to `x₀`).
+- To do this, we take every value of a feature and subtract the average (mean) of that feature and divide by a scale (range or standard deviation).
+
+$$
+x'_{j} = \frac{x_{j} - \mu_{j}}{\mathrm{range}_{j}}, \quad \text{where } \mathrm{range}_{j} = \max(x_{j}) - \min(x_{j})
+$$
+
+Definitions:
+- `xⱼ`: original value of feature `j`
+- `μⱼ`: mean (average) of feature `j`
+- `rangeⱼ`: range of feature `j` = max − min (you can also use standard deviation instead)
+- `x'ⱼ`: normalized value (after scaling)
+
+Example (one feature):
+
+    - Original values: `[100, 200, 300, 400, 500]` (e.g., house prices in $k)
+    - Mean: `μ = (100+200+300+400+500)/5 = 300`
+    - Range: `range = 500 − 100 = 400`
+    - Normalize each value using `x' = (x − 300)/400`:
+
+    - 100 → `(100 − 300)/400 = −0.5`
+    - 200 → `(200 − 300)/400 = −0.25`
+    - 300 → `(300 − 300)/400 = 0`
+    - 400 → `(400 − 300)/400 = 0.25`
+    - 500 → `(500 − 300)/400 = 0.5`
+
+    - Result: normalized values `[-0.5, −0.25, 0, 0.25, 0.5]` (centered around 0 and nicely scaled)
+
+
+### Practical recipe
+1) Keep the bias feature unscaled: `x₀ = 1`.
+2) For each other feature, compute `μⱼ` and a scale `sⱼ` (range or std), then transform `(xⱼ − μⱼ)/sⱼ`.
+3) Train with gradient descent; convergence should improve (fewer iterations).
+4) At inference, apply the same `μⱼ` and `sⱼ` to new inputs before computing `h_θ(x)`.
+
+### Key takeaways (Lecture 3)
+- Feature scaling (and mean normalization) makes gradient descent much faster and more stable.
+- Aim for roughly comparable feature ranges; exact bounds aren’t required.
+- Keep the bias `x₀` unscaled; center/scale the rest.
 
