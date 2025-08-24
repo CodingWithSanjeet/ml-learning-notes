@@ -24,10 +24,18 @@ Welcome! In this module we upgrade linear regression to use many features (a.k.a
 - [Lecture 3: Gradient Descent in Practice I – Feature Scaling](#lecture-3-gradient-descent-in-practice-i--feature-scaling)
   - [Why scale features?](#why-scale-features)
   - [Target ranges and rules of thumb](#target-ranges-and-rules-of-thumb)
-  - [Mean normalization + scaling formula](#mean-normalization--scaling-formula)
-  - [Mini example (before/after)](#mini-example-beforeafter)
+  - [Mean normalization + scaling (recommended)](#mean-normalization--scaling-recommended)
   - [Practical recipe](#practical-recipe)
   - [Key takeaways (Lecture 3)](#key-takeaways-lecture-3)
+
+- [Lecture 4: Gradient Descent in Practice II – Learning Rate](#lecture-4-gradient-descent-in-practice-ii--learning-rate)
+  - [Why monitor J(θ) during training?](#why-monitor-jθ-during-training)
+  - [How to plot J(θ) over iterations](#how-to-plot-jθ-over-iterations)
+  - [Detecting convergence](#detecting-convergence)
+  - [When J(θ) goes up: learning rate too large](#when-jθ-goes-up-learning-rate-too-large)
+  - [Too small α: slow, tiny steps](#too-small-α-slow-tiny-steps)
+  - [Practical recipe for choosing α](#practical-recipe-for-choosing-α)
+  - [Key takeaways (Lecture 4)](#key-takeaways-lecture-4)
 
 ---
 
@@ -436,9 +444,10 @@ solution much faster.
 - Mean normalization adjusts each feature so its average becomes ≈ 0 (don’t apply to `x₀`).
 - To do this, we take every value of a feature and subtract the average (mean) of that feature and divide by a scale (range or standard deviation).
 
-$$
+ 
+```math
 x'_{j} = \frac{x_{j} - \mu_{j}}{\mathrm{range}_{j}}, \quad \text{where } \mathrm{range}_{j} = \max(x_{j}) - \min(x_{j})
-$$
+```
 
 Definitions:
 - `xⱼ`: original value of feature `j`
@@ -473,3 +482,91 @@ Example (one feature):
 - Aim for roughly comparable feature ranges; exact bounds aren’t required.
 - Keep the bias `x₀` unscaled; center/scale the rest.
 
+
+## Lecture 4: Gradient Descent in Practice II – Learning Rate
+
+### Why monitor J(θ) during training?
+- The goal of gradient descent is to reduce the cost `J(θ)` over time. Tracking `J(θ)` after each iteration acts as a live health‑check for training.
+- If things work, `J(θ)` should steadily decrease. If it increases or oscillates wildly, that’s a red flag.
+
+Update rule (unified, for all parameters):
+
+```math
+\theta_j := \theta_j - \alpha \cdot \frac{1}{m} \sum_{i=1}^{m} \big(h_\theta(x^{(i)}) - y^{(i)}\big)\,x^{(i)}_j,\quad j = 0,1,\dots,n
+```
+
+### How to plot J(θ) over iterations
+- On the x‑axis, put iteration number (1, 2, 3, …). On the y‑axis, compute `J(θ)` using the current `θ` after each update.
+- Expect a smooth downward curve; minor noise is okay if using stochastic methods, but here we focus on batch GD.
+
+Illustration:
+
+![How to plot J(θ)](images/Lecture-4/gd_plot_j_curve.png)
+
+### Detecting convergence
+- Visual cue: the `J(θ)` curve flattens — extra iterations barely reduce the value.
+- **Rule of thumb:** stop when the per‑iteration drop is “negligible” for many steps in a row.
+- **Automatic Convergence Test:** stop if `J(θ)` 
+decreases by less than a small threshold ε in one 
+iteration
+
+```math
+\text{Stop if }\; \big| J^{(t)} - J^{(t-1)} \big| < \varepsilon
+```
+
+  Pick a tiny threshold, for example ε = 10⁻³ (you can tune this). A stricter option is to require the test to pass for K consecutive steps. In practice, the “best” ε (and K) depends on your problem, so also glance at the J(θ) curve to be sure.
+
+Illustration:
+
+![Convergence plateau](images/Lecture-4/convergence.webp)
+
+### When J(θ) goes up: learning rate too large
+- Symptom: `J(θ)` increases, or decreases then jumps up, or oscillates up and down.
+- Cause: `α` is too big — the update overshoots the minimum.
+- Fix: reduce `α` and re‑run. For linear regression, with small enough `α`, `J(θ)` monotonically decreases with batch GD.
+
+![Convergence plateau](images/Lecture-4/big_alpha.webp)
+
+- 🔵 Blue (Expected smooth decrease): With a proper small learning rate, the cost function decreases smoothly and monotonically.
+
+- 🔴 Red (α too large): With a large learning rate, the cost function oscillates or even increases instead of converging.
+
+### Too small α: slow, tiny steps
+- Symptom: `J(θ)` decreases but very slowly; you need many iterations to make progress.
+- Cause: `α` is too small — steps are “baby steps.”
+- Fix: try a larger `α` to speed up convergence without causing divergence.
+
+![Convergence plateau](images/Lecture-4/small_alpha.webp)
+
+
+### Strategy to Choose α
+Try a quick sweep and compare `J(θ)` curves:
+- Start around `α ∈ {0.001, 0.003, 0.01, 0.03, 0.1}` — each about 3× apart.
+- For each `α`, run gradient descent for a fixed number of iterations and plot `J(θ)` vs. iteration.
+- Pick the largest `α` that still gives a smooth, consistently decreasing curve.
+- If everything diverges, shift the grid downward (e.g., `0.0003, 0.001, 0.003, …`). If everything is very slow, shift upward.
+
+![Convergence plateau](images/Lecture-4/learning_rate_sweep_best_alpha.png)
+
+- For sufficiently small `α`, `J(θ)` should decrease on every iteration
+- But if `α` is too small, gradient descent can be slow converge.
+
+Practical notes:
+- Always compute `J(θ)` using the same normalization/scaling as your features during training.
+- Keep simultaneous parameter updates and a fixed `α` during an experiment so curves are comparable.
+
+Illustrations of α behavior:
+
+![Alpha paths on J(θ) bowl](images/Lecture-4/gd_alpha_comparison.webp)
+
+
+
+Another view (steps on the 1D bowl):
+
+![Alpha scenarios](images/Lecture-4/alpha_comp.png)
+
+### Key takeaways (Lecture 4)
+- Monitor `J(θ)` every iteration; the curve is your fastest debugging tool.
+- If `J(θ)` increases or oscillates → `α` is likely too large; reduce it.
+- If `J(θ)` crawls downward → `α` is too small; increase it.
+- Use a small sweep of `α` values spaced by ~3× to quickly home in on a good learning rate.
